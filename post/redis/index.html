@@ -1,13 +1,20 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" >
+
 <title>Redis | Iktsuarpok</title>
-<link rel="shortcut icon" href="https://liuyuzheng8.github.io/favicon.ico?v=1583412525909">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://liuyuzheng8.github.io/favicon.ico?v=1583412599581">
 <link rel="stylesheet" href="https://liuyuzheng8.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="Redis | Iktsuarpok - Atom Feed" href="https://liuyuzheng8.github.io/atom.xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
 
 
@@ -22,68 +29,63 @@ NoSQL：即Not-OnlySQL（泛指非关系型的数据库），作为关系型数�
 可扩容，可伸缩
 大数据量下高性..." />
     <meta name="keywords" content="数据库" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://liuyuzheng8.github.io">
-  <img class="avatar" src="https://liuyuzheng8.github.io/images/avatar.png?v=1583412525909" alt="">
-  </a>
-  <h1 class="site-title">
-    Iktsuarpok
-  </h1>
-  <p class="site-description">
-    个人学习笔记
-  </p>
-  <div class="menu-container">
-    
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://liuyuzheng8.github.io">
+        <img src="https://liuyuzheng8.github.io/images/avatar.png?v=1583412599581" class="site-logo">
+        <h1 class="site-title">Iktsuarpok</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
       
-        <a href="https://liuyuzheng8.github.io/post/redis-bi-ji" class="menu">
-          Redis
-        </a>
+        
+          <a href="https://liuyuzheng8.github.io/post/redis-bi-ji" class="site-nav">
+            Redis
+          </a>
+        
       
-    
+    </div>
   </div>
-  <div class="social-container">
-    
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
+      
+    </div>
+    <div class="site-description">
+      个人学习笔记
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://liuyuzheng8.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
   </div>
 </div>
 
-        <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              Redis
-            </h2>
-            <div class="post-info">
-              <span>
-                2020-03-05
-              </span>
-              <span>
-                28 min read
-              </span>
-              
-                <a href="https://liuyuzheng8.github.io/tag/i5L1NzG9C/" class="post-tag">
-                  # 数据库
-                </a>
-              
-            </div>
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Redis</h2>
+            <div class="post-date">2020-03-05</div>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <h1 id="redis">Redis</h1>
+            <div class="post-content" v-pre>
+              <h1 id="redis">Redis</h1>
 <h2 id="redis基础">Redis基础</h2>
 <h3 id="redis简介">Redis简介</h3>
 <h4 id="nosql">NoSQL</h4>
@@ -1301,180 +1303,53 @@ redis-cli -a &lt;password&gt;
 auth &lt;password&gt;
 </code></pre>
 
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li><a href="#redis">Redis</a>
-<ul>
-<li><a href="#redis%E5%9F%BA%E7%A1%80">Redis基础</a>
-<ul>
-<li><a href="#redis%E7%AE%80%E4%BB%8B">Redis简介</a>
-<ul>
-<li><a href="#nosql">NoSQL</a></li>
-<li><a href="#redis%E6%A6%82%E5%BF%B5">Redis概念</a></li>
-</ul>
-</li>
-<li><a href="#redis%E6%95%B0%E6%8D%AE">Redis数据</a>
-<ul>
-<li><a href="#redis%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E6%A0%BC%E5%BC%8F">Redis数据存储格式</a></li>
-<li><a href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B">数据类型</a></li>
-</ul>
-</li>
-<li><a href="#redis%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C">Redis的基本操作</a>
-<ul>
-<li><a href="#string%E7%B1%BB%E5%9E%8B">String类型</a></li>
-<li><a href="#hash%E7%B1%BB%E5%9E%8B">Hash类型</a></li>
-<li><a href="#list%E7%B1%BB%E5%9E%8B">List类型</a></li>
-<li><a href="#set%E7%B1%BB%E5%9E%8B">Set类型</a></li>
-<li><a href="#sorted_set%E7%B1%BB%E5%9E%8B">Sorted_set类型</a></li>
-</ul>
-</li>
-<li><a href="#%E9%80%9A%E7%94%A8%E5%91%BD%E4%BB%A4">通用命令</a>
-<ul>
-<li><a href="#key%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C">key的基本操作</a></li>
-<li><a href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C">数据库基本操作</a></li>
-</ul>
-</li>
-<li><a href="#jdies">Jdies</a>
-<ul>
-<li><a href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F">使用方式</a></li>
-<li><a href="#jedis%E5%B7%A5%E5%85%B7%E7%B1%BB">Jedis工具类</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#redis%E9%AB%98%E7%BA%A7">Redis高级</a>
-<ul>
-<li><a href="#linux%E7%8E%AF%E5%A2%83%E4%B8%8B%E7%9A%84redis">Linux环境下的Redis</a>
-<ul>
-<li><a href="#%E5%9C%A8linux%E7%8E%AF%E5%A2%83%E4%B8%AD%E5%AE%89%E8%A3%85redis">在Linux环境中安装redis</a></li>
-<li><a href="#%E5%90%AF%E5%8A%A8redis%E6%9C%8D%E5%8A%A1">启动Redis服务</a></li>
-</ul>
-</li>
-<li><a href="#%E6%8C%81%E4%B9%85%E5%8C%96">持久化</a>
-<ul>
-<li><a href="#rdb%E6%96%B9%E5%BC%8F">RDB方式</a></li>
-<li><a href="#aof%E6%96%B9%E5%BC%8F">AOF方式</a>
-<ul>
-<li><a href="#aof%E9%87%8D%E5%86%99">AOF重写</a></li>
-</ul>
-</li>
-<li><a href="#rdb%E4%B8%8Eaof%E5%AF%B9%E6%AF%94">RDB与AOF对比</a></li>
-</ul>
-</li>
-<li><a href="#%E4%BA%8B%E5%8A%A1">事务</a></li>
-<li><a href="#%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5">删除策略</a>
-<ul>
-<li><a href="#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5">数据删除策略</a>
-<ul>
-<li><a href="#%E5%AE%9A%E6%97%B6%E5%88%A0%E9%99%A4">定时删除</a></li>
-<li><a href="#%E6%83%B0%E6%80%A7%E5%88%A0%E9%99%A4">惰性删除</a></li>
-<li><a href="#%E5%AE%9A%E6%9C%9F%E5%88%A0%E9%99%A4">定期删除</a></li>
-</ul>
-</li>
-<li><a href="#%E6%95%B0%E6%8D%AE%E9%80%90%E5%87%BA%E7%AD%96%E7%95%A5">数据逐出策略</a></li>
-</ul>
-</li>
-<li><a href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE">服务器配置</a></li>
-<li><a href="#%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B">高级数据类型</a>
-<ul>
-<li><a href="#bitmaps">Bitmaps</a></li>
-<li><a href="#hyperloglog">HyperLogLog</a></li>
-<li><a href="#geo">GEO</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#redis%E9%9B%86%E7%BE%A4">Redis集群</a>
-<ul>
-<li><a href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6">主从复制</a>
-<ul>
-<li><a href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B">工作流程</a>
-<ul>
-<li><a href="#%E9%98%B6%E6%AE%B51%E5%BB%BA%E7%AB%8B%E8%BF%9E%E6%8E%A5%E9%98%B6%E6%AE%B5%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B">阶段1：建立连接阶段工作流程</a></li>
-<li><a href="#%E9%98%B6%E6%AE%B52%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E9%98%B6%E6%AE%B5%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B">阶段2：数据同步阶段工作流程</a>
-<ul>
-<li><a href="#%E9%83%A8%E5%88%86%E5%A4%8D%E5%88%B6%E7%9A%84%E4%B8%89%E4%B8%AA%E6%A0%B8%E5%BF%83%E8%A6%81%E7%B4%A0">部分复制的三个核心要素</a></li>
-</ul>
-</li>
-<li><a href="#%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE">授权访问</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-              </div>
             </div>
-          </article>
-        </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://liuyuzheng8.github.io/tag/i5L1NzG9C/" class="tag">
+                    数据库
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://liuyuzheng8.github.io/post/springboot/">
+                  <h3 class="post-title">
+                    SpringBoot
+                  </h3>
+                </a>
+              </div>
+            
 
-        
-          <div class="next-post">
-            <div class="next">下一篇</div>
-            <a href="https://liuyuzheng8.github.io/post/springboot/">
-              <h3 class="post-title">
-                SpringBoot
-              </h3>
-            </a>
+            
+
           </div>
-        
 
-        
-
-        <div class="site-footer">
-  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://liuyuzheng8.github.io/atom.xml" target="_blank">
-    <i class="ri-rss-line"></i> RSS
-  </a>
-</div>
-
+        </div>
       </div>
     </div>
 
-    <script>
-      hljs.initHighlightingOnLoad()
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
 
-      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+AOS.init();
 
-      // This should probably be throttled.
-      // Especially because it triggers during smooth scrolling.
-      // https://lodash.com/docs/4.17.10#throttle
-      // You could do like...
-      // window.addEventListener("scroll", () => {
-      //    _.throttle(doThatStuff, 100);
-      // });
-      // Only not doing it here to keep this Pen dependency-free.
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
-      window.addEventListener("scroll", event => {
-        let fromTop = window.scrollY;
+</script>
 
-        mainNavLinks.forEach((link, index) => {
-          let section = document.getElementById(decodeURI(link.hash).substring(1));
-          let nextSection = null
-          if (mainNavLinks[index + 1]) {
-            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-          }
-          if (section.offsetTop <= fromTop) {
-            if (nextSection) {
-              if (nextSection.offsetTop > fromTop) {
-                link.classList.add("current");
-              } else {
-                link.classList.remove("current");    
-              }
-            } else {
-              link.classList.add("current");
-            }
-          } else {
-            link.classList.remove("current");
-          }
-        });
-      });
 
-    </script>
+
+
+
+
   </body>
 </html>
