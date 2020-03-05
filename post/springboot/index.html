@@ -4,70 +4,80 @@
     <meta charset="utf-8" >
 
 <title>SpringBoot | Gridea</title>
-<meta name="description" content="温故而知新">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<link rel="shortcut icon" href="https://liuyuzheng8.github.io/favicon.ico?v=1583411772681">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="stylesheet" href="https://unpkg.com/papercss@1.6.1/dist/paper.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="shortcut icon" href="https://liuyuzheng8.github.io/favicon.ico?v=1583412047740">
 <link rel="stylesheet" href="https://liuyuzheng8.github.io/styles/main.css">
 
 
-<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
-
 
 <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
 
+
+    <meta name="description" content="SpringBoot
+什么是 SpringBoot
+SpringBoot是一个javaweb的开发框架，和SpringMVC类似，对比其他javaweb框架的好处，官方说是简化开发，约定大于配置， you can &quot;just ru..." />
+    <meta name="keywords" content="框架" />
   </head>
   <body>
-  
-    <nav class="navbar border fixed split-nav">
-  <div class="nav-brand">
-    <h3><a href="https://liuyuzheng8.github.io">Gridea</a></h3>
-  </div>
-  <div class="collapsible">
-    <input id="collapsible1" type="checkbox" name="collapsible1">
-    <button>
-      <label for="collapsible1">
-        <div class="bar1"></div>
-        <div class="bar2"></div>
-        <div class="bar3"></div>
-      </label>
-    </button>
-    <div class="collapsible-body">
-      <ul class="inline">
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://liuyuzheng8.github.io">
+        <img src="https://liuyuzheng8.github.io/images/avatar.png?v=1583412047740" class="site-logo">
+        <h1 class="site-title">Gridea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
         
-          <li>
-            
-              <a href="https://liuyuzheng8.github.io/post/redis-bi-ji" class="menu">
-                Redis
-              </a>
-            
-          </li>
+          <a href="https://liuyuzheng8.github.io/post/redis-bi-ji" class="site-nav">
+            Redis
+          </a>
         
-      </ul>
+      
     </div>
   </div>
-</nav>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://liuyuzheng8.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
 
-    <div id="top" class="row site">
-      <div class="sm-12 md-8 col">
-        <div class="paper">
-          <article class="article">
-            <h1>SpringBoot</h1>
-            <p class="article-meta">
-              2020-03-05
-              
-                <a href="https://liuyuzheng8.github.io/tag/aA-yofVdw/" class="badge secondary">
-                  框架
-                </a>
-              
-            </p>
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">SpringBoot</h2>
+            <div class="post-date">2020-03-05</div>
             
-            <div class="post-content">
+            <div class="post-content" v-pre>
               <h1 id="springboot">SpringBoot</h1>
 <h2 id="什么是-springboot">什么是 SpringBoot</h2>
 <p>SpringBoot是一个javaweb的开发框架，和SpringMVC类似，对比其他javaweb框架的好处，官方说是简化开发，约定大于配置， you can &quot;just run&quot;，能迅速的开发web应用，几行代码开发一个http接口</p>
@@ -1611,98 +1621,40 @@ spring.mail.properties.mail.smtp.ssl.enable=true
 <p>cron 表达式参考： https://www.cnblogs.com/tommyli/p/3760671.html</p>
 
             </div>
-          </article>
-        </div>
-        <div class="paper" data-aos="fade-in">
-          
-            <div class="next-post">
-              <div class="next">
-                下一篇
+            
+              <div class="tag-container">
+                
+                  <a href="https://liuyuzheng8.github.io/tag/aA-yofVdw/" class="tag">
+                    框架
+                  </a>
+                
               </div>
-              <a href="https://liuyuzheng8.github.io/post/redis-bi-ji/">
-                <h3 class="post-title">
-                  Redis
-                </h3>
-              </a>
-            </div>
-          
+            
+            
+
+            
+
+          </div>
+
         </div>
-        
       </div>
-
-      <div class="sm-12 md-4 col sidebar">
-  <div class="paper info-container">
-    <img src="https://liuyuzheng8.github.io/images/avatar.png?v=1583411772681" class="no-responsive avatar">
-    <div class="text-muted">温故而知新</div>
-    <div class="social-container">
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    </div>
-  </div>
-  <div class="paper">
-    <div class="sidebar-title">
-      最新文章
-    </div>
-    <div class="row">
-      <ul>
-        
-          
-            <li>
-              <a href="https://liuyuzheng8.github.io/post/springboot/">SpringBoot</a>
-            </li>
-          
-        
-          
-            <li>
-              <a href="https://liuyuzheng8.github.io/post/redis-bi-ji/">Redis</a>
-            </li>
-          
-        
-      </ul>
-    </div>
-  </div>
-  <div class="paper">
-    <div class="sidebar-title">
-      标签列表
-    </div>
-    <div class="row">
-      
-        <a href="https://liuyuzheng8.github.io/tag/aA-yofVdw/" class="badge warning">
-          框架
-        </a>
-      
-        <a href="https://liuyuzheng8.github.io/tag/ias5NBORd/" class="badge ">
-          数据库
-        </a>
-      
-    </div>
-  </div>
-  <div class="paper">
-    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://liuyuzheng8.github.io/atom.xml" target="_blank">RSS</a>
-  </div>
-</div>
-
-
     </div>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-
 <script type="application/javascript">
 
 AOS.init();
 
-hljs.initHighlightingOnLoad()
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
 </script>
+
+
 
 
 

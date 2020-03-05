@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Redis | Gridea</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://liuyuzheng8.github.io/favicon.ico?v=1583412047740">
+<link rel="stylesheet" href="https://liuyuzheng8.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Redis
+Redis基础
+Redis简介
+NoSQL
+NoSQL：即Not-OnlySQL（泛指非关系型的数据库），作为关系型数据库的补充。
+作用：应对基于海量用户和海量数据前提下的数据处理问题。
+特征：
+
+可扩容，可伸缩
+大数据量下高性..." />
+    <meta name="keywords" content="数据库" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://liuyuzheng8.github.io">
+        <img src="https://liuyuzheng8.github.io/images/avatar.png?v=1583412047740" class="site-logo">
+        <h1 class="site-title">Gridea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://liuyuzheng8.github.io/post/redis-bi-ji" class="site-nav">
+            Redis
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://liuyuzheng8.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Redis</h2>
+            <div class="post-date">2020-03-05</div>
+            
+            <div class="post-content" v-pre>
+              <h1 id="redis">Redis</h1>
+<h2 id="redis基础">Redis基础</h2>
+<h3 id="redis简介">Redis简介</h3>
+<h4 id="nosql">NoSQL</h4>
+<p>NoSQL：即Not-OnlySQL（泛指非关系型的数据库），作为关系型数据库的补充。</p>
+<p>作用：应对基于海量用户和海量数据前提下的数据处理问题。</p>
+<p>特征：</p>
+<ul>
+<li>可扩容，可伸缩</li>
+<li>大数据量下高性能</li>
+<li>灵活的数据模型</li>
+<li>高可用</li>
+</ul>
+<hr>
+<h4 id="redis概念">Redis概念</h4>
+<p><strong>Redis</strong>是用C语言开发的一个开源的高性能键值对（key-value）数据库。</p>
+<p>特征：</p>
+<ol>
+<li>数据间没有必然的关联关系</li>
+<li>内部采用<strong>单线程</strong>机制进行工作</li>
+<li>高性能</li>
+<li>多数据类型支持</li>
+<li>持久化支持</li>
+</ol>
+<hr>
+<h3 id="redis数据">Redis数据</h3>
+<h4 id="redis数据存储格式">Redis数据存储格式</h4>
+<p>Redis自身的是一个Map，所有的数据以键值对的方式存储。</p>
+<blockquote>
+<p>key的设置约定</p>
+</blockquote>
+<p>表名：主键名：主键值：字段名</p>
+<hr>
+<h4 id="数据类型">数据类型</h4>
+<blockquote>
+<p>string类型</p>
+</blockquote>
+<ul>
+<li>存储的数据：单个数据，最简单的数据存储类型，也是最常用的数据存储类型</li>
+<li>存储数据的格式：一个存储空间保存一个数据</li>
+<li>存储内容：通常使用字符串，如果字符串以整数的形式是展示，可以作为数字操作使用</li>
+</ul>
+<blockquote>
+<p>hash类型</p>
+</blockquote>
+<ul>
+<li>存储需求：对一系列存储的数据进行编组，方便管理，典型应用存储对象信息</li>
+<li>需要的存储结构：一个存储空间保存多个键值对数据</li>
+<li>hash：底层使用哈希表结构实现数据存储</li>
+</ul>
+<blockquote>
+<p>list类型</p>
+</blockquote>
+<ul>
+<li>存储需求：存储多个数据，并对数据进入存储空间的顺序进行区分</li>
+<li>需要的存储结构：一个存储空间保存多个数据，且通过数据可以体现进入顺序</li>
+<li>list：保存多个数据，底层使用双向链表存储结构实现</li>
+</ul>
+<blockquote>
+<p>set类型</p>
+</blockquote>
+<ul>
+<li>存储需求：存储大量的数据，在查询方面提供跟高的效率</li>
+<li>需要的存储结构：能够保存大量的数据，高效的内部存储机制，便于查询</li>
+<li>set：与hash的存储结构完全相同，将值存储于hash的key中，hash的value中存储nil，并且值不允许重复</li>
+</ul>
+<blockquote>
+<p>sorted_set类型</p>
+</blockquote>
+<ul>
+<li>存储需求：数据排序有利于数据的有效展示，需要提供一种可以根据自身特征进行排序的方式</li>
+<li>需要的存储结构：新的存储模型，可以保存可排序的数据</li>
+<li>sorted_set：在set的存储结构基础上添加可排序字段</li>
+</ul>
+<hr>
+<h3 id="redis的基本操作">Redis的基本操作</h3>
+<h4 id="string类型">String类型</h4>
+<blockquote>
+<p>信息添加</p>
+</blockquote>
+<ul>
+<li>
+<p>功能：设置 key value</p>
+</li>
+<li>
+<p>命令</p>
+</li>
+</ul>
+<pre><code>set key value
+</code></pre>
+<blockquote>
+<p>信息查询</p>
+</blockquote>
+<ul>
+<li>
+<p>功能：根据 key 查询 value</p>
+</li>
+<li>
+<p>命令</p>
+</li>
+</ul>
+<pre><code>get key
+</code></pre>
+<blockquote>
+<p>信息删除</p>
+</blockquote>
+<ul>
+<li>
+<p>功能：删除 key value</p>
+</li>
+<li>
+<p>命令</p>
+</li>
+</ul>
+<pre><code>del key
+</code></pre>
+<blockquote>
+<p>添加/修改多个数据</p>
+</blockquote>
+<pre><code>mset key1 value1 key2 value2 ...
+</code></pre>
+<blockquote>
+<p>获取多个数据</p>
+</blockquote>
+<pre><code>mget key1 key2 ...
+</code></pre>
+<blockquote>
+<p>获取数据字符个数（字符串长度）</p>
+</blockquote>
+<pre><code>strlen key
+</code></pre>
+<blockquote>
+<p>追加信息到原始信息后</p>
+</blockquote>
+<pre><code>append key value
+</code></pre>
+<blockquote>
+<p>设置数值数据增加/减少指定范围的值</p>
+</blockquote>
+<pre><code>incr/decr key
+incrby/decrby key integerNumber
+incrbyfloat key floatNumber
+</code></pre>
+<blockquote>
+<p>设置指定时常的生命周期的数据</p>
+</blockquote>
+<pre><code>setex key seconds value		
+psetex key milliseconds		
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>数据操作返回值
+<ul>
+<li>表示数据运行结果是否成功，成功：(integer)1、失败：(integer)0</li>
+<li>表示运行结果值，如：(integer)3</li>
+</ul>
+</li>
+<li>未获取到数据
+<ul>
+<li>(nil) 等同于null</li>
+</ul>
+</li>
+<li>数据最大存储量：512MB</li>
+</ul>
+<hr>
+<h4 id="hash类型">Hash类型</h4>
+<blockquote>
+<p>添加/修改数据</p>
+</blockquote>
+<pre><code>hset key field value
+hsetnx key field value 		//如果库中存在key则不添加
+
+</code></pre>
+<blockquote>
+<p>获取数据</p>
+</blockquote>
+<pre><code>hget key field
+hgetall key			//获取全部
+
+</code></pre>
+<blockquote>
+<p>删除数据</p>
+</blockquote>
+<pre><code>hdel key field1 [field2]
+
+</code></pre>
+<blockquote>
+<p>添加/修改多个数据</p>
+</blockquote>
+<pre><code>hmset key field1 value1 field2 value2 ...
+
+</code></pre>
+<blockquote>
+<p>获取数据</p>
+</blockquote>
+<pre><code>hmget key field1 field2 ...
+
+</code></pre>
+<blockquote>
+<p>获取哈希表中的字数</p>
+</blockquote>
+<pre><code>hlen key
+
+</code></pre>
+<blockquote>
+<p>获取哈希表中是否存在指定字段</p>
+</blockquote>
+<pre><code>hexists key field
+
+</code></pre>
+<blockquote>
+<p>获取哈希表中所有的字段名或字段值</p>
+</blockquote>
+<pre><code>hkeys key
+hvals key
+
+</code></pre>
+<blockquote>
+<p>设置指定字段的数值数据增加指定范围的值</p>
+</blockquote>
+<pre><code>hincrby key field integerNumber
+hincrbyfloat key field floatNumber
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>hash类型下的value只能存储字符串，不允许存储其他数据类型</li>
+<li>每个hash可以存储2<sup>32</sup>-1个键值对</li>
+<li>hash类型十分贴近对象的数据存储形式，并且可以灵活的添加或删除对象属性，但hash设计初衷并不是为了存储大量对象，所以不可滥用，更不可将hash作为对象列表使用</li>
+<li>hgetall可以获取全部属性，但是如果内部field过多，会导致遍历整体数据效率变低，成为数据访问瓶颈</li>
+</ul>
+<hr>
+<h4 id="list类型">List类型</h4>
+<blockquote>
+<p>添加/修改数据</p>
+</blockquote>
+<pre><code>lpush key value1 [value2] ...	//左进入
+rpush key value1 [value2] ...	//右进入
+
+</code></pre>
+<blockquote>
+<p>获取数据</p>
+</blockquote>
+<pre><code>lrange key start stop
+lindex key index
+llen key
+
+</code></pre>
+<blockquote>
+<p>获取并移除数据</p>
+</blockquote>
+<pre><code>lpop key
+rpop key
+
+</code></pre>
+<blockquote>
+<p>规定时间内获取并移除数据</p>
+</blockquote>
+<pre><code>blpop key1 [key2] timeout
+brpop key1 [key2] timeout
+
+</code></pre>
+<blockquote>
+<p>移除指定数据</p>
+</blockquote>
+<pre><code>lrem key count value
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>list中保存的数据都是string类型的，最多容纳2<sup>32</sup>-1条数据</li>
+<li>list具有索引的概念，但是操作时通常以队列的形式进行出入队操作，或以栈形式进行出入栈操作</li>
+<li>获取全部数据操作的结束索引设置为-1</li>
+<li>list可以对数据进行分页操作，通常第一页信息来自于list，第二页及更多信息通过数据库加载</li>
+</ul>
+<hr>
+<h4 id="set类型">Set类型</h4>
+<blockquote>
+<p>添加数据</p>
+</blockquote>
+<pre><code>sadd key member1 [member2]
+
+</code></pre>
+<blockquote>
+<p>获取全部数据</p>
+</blockquote>
+<pre><code>semebers key
+
+</code></pre>
+<blockquote>
+<p>删除数据</p>
+</blockquote>
+<pre><code>srem key member1 [member2]
+
+</code></pre>
+<blockquote>
+<p>获取集合数据总量</p>
+</blockquote>
+<pre><code>scard key
+
+</code></pre>
+<blockquote>
+<p>判断集合中是否包含指定数据</p>
+</blockquote>
+<pre><code>sismember key member
+
+</code></pre>
+<blockquote>
+<p>随机获取集合中指定数量的数据</p>
+</blockquote>
+<pre><code>srandmember key [count]
+
+</code></pre>
+<blockquote>
+<p>随机获取集合中的某个数据并将该数据移出集合</p>
+</blockquote>
+<pre><code>spop key [count]
+
+</code></pre>
+<blockquote>
+<p>求两个集合的交、并、差集</p>
+</blockquote>
+<pre><code>sinter key1 [key...]
+sunion key1 [key...]
+sdiff key1 [key...]
+
+</code></pre>
+<blockquote>
+<p>求两个集合的交、并、差集并存到指定集合中</p>
+</blockquote>
+<pre><code>sinterstore destination key1 [key...]
+sunionstore destination key1 [key...]
+sdiffstore destination key1 [key...]
+
+</code></pre>
+<blockquote>
+<p>将指定数据从原始集合中移动到目标集合中</p>
+</blockquote>
+<pre><code>smove source destination member
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>set类型不允许数据重复，如果添加的数据在set中已存在，将只保留一份</li>
+<li>set虽然与hash的存储结构相同，但是无法启用hash中存储值的空间</li>
+</ul>
+<hr>
+<h4 id="sorted_set类型">Sorted_set类型</h4>
+<blockquote>
+<p>添加数据</p>
+</blockquote>
+<pre><code>zadd key score1 member1 [score member ...]
+
+</code></pre>
+<blockquote>
+<p>获取全部数据</p>
+</blockquote>
+<pre><code>zrange key start stop [WITHSCORES]
+zrevrange key start stop [WITHSCORES]
+
+</code></pre>
+<blockquote>
+<p>删除数据</p>
+</blockquote>
+<pre><code>zrem key member [member ...]
+
+</code></pre>
+<blockquote>
+<p>按条件获取数据</p>
+</blockquote>
+<pre><code>zrangebyrescore key min max [WITHSCORES] [LIMIT]
+zrevrangebyscore key min max [WITHSCORES] [LIMIT]
+
+</code></pre>
+<blockquote>
+<p>条件删除数据</p>
+</blockquote>
+<pre><code>zremrangebyrank key start stop
+zremrangebyscore key min max
+
+</code></pre>
+<blockquote>
+<p>获取集合数据总量</p>
+</blockquote>
+<pre><code>zcard key
+zcount key min max
+
+</code></pre>
+<blockquote>
+<p>集合交、并操作</p>
+</blockquote>
+<pre><code>zinterstore destination numkeys key [key ...]
+zunionstore destination numkeys key [key ...]
+
+</code></pre>
+<blockquote>
+<p>获取数据对应的索引（排名）</p>
+</blockquote>
+<pre><code>zrank key member
+zrevrank key member
+
+</code></pre>
+<blockquote>
+<p>score值获取与修改</p>
+</blockquote>
+<pre><code>zscore key member
+zincrby key increment 
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>score保存的数据存储空间是64位</li>
+<li>score保存的数据也可以是一个双精度的double值，基于双精度浮点数的特征，可能会丢失精度，使用时需要谨慎</li>
+<li>sorted_set底层存储结构还是基于set的，因此数据不允许重复，如果重复添加数据，score值将被覆盖，保留最后一次修改的结果</li>
+</ul>
+<hr>
+<h3 id="通用命令">通用命令</h3>
+<h4 id="key的基本操作">key的基本操作</h4>
+<blockquote>
+<p>删除指定key</p>
+</blockquote>
+<pre><code>del key
+
+</code></pre>
+<blockquote>
+<p>获取key是否存在</p>
+</blockquote>
+<pre><code>exists key
+
+</code></pre>
+<blockquote>
+<p>获取key的类型</p>
+</blockquote>
+<pre><code>type key
+
+</code></pre>
+<blockquote>
+<p>查询key</p>
+</blockquote>
+<pre><code>keys pattern
+* 匹配任意数量的任意符号
+? 匹配任意一个符号
+[] 匹配一个指定的符号
+
+</code></pre>
+<blockquote>
+<p>改变key的名字</p>
+</blockquote>
+<pre><code>rename key newkey
+renamenx key newkey
+
+</code></pre>
+<blockquote>
+<p>对所有key排序</p>
+</blockquote>
+<pre><code>sort
+
+</code></pre>
+<p><strong>时效性操作：</strong></p>
+<blockquote>
+<p>为指定的key设置有效期</p>
+</blockquote>
+<pre><code>expire key seconds
+pexpire key milliseconds
+expireat key timestamp
+pexpireat key milliseconds
+
+</code></pre>
+<blockquote>
+<p>获取key的有效时间</p>
+</blockquote>
+<pre><code>ttl key
+pttl key
+
+</code></pre>
+<blockquote>
+<p>将key从时效性转换为永久性</p>
+</blockquote>
+<pre><code>persist key
+
+</code></pre>
+<hr>
+<h4 id="数据库基本操作">数据库基本操作</h4>
+<ul>
+<li>redis为每个服务提供有16个数据库，编号从0-15</li>
+<li>每个数据库之间的数据相互独立</li>
+</ul>
+<blockquote>
+<p>切换数据库</p>
+</blockquote>
+<pre><code>select index
+
+</code></pre>
+<blockquote>
+<p>数据移动</p>
+</blockquote>
+<pre><code>move key db
+
+</code></pre>
+<blockquote>
+<p>数据清除</p>
+</blockquote>
+<pre><code>dbsize		//查看数据总量
+flushdb		//清除当前数据
+flushall	//清除全部数据
+
+</code></pre>
+<blockquote>
+<p>其他操作</p>
+</blockquote>
+<pre><code>quit
+ping
+echo message
+
+</code></pre>
+<hr>
+<h3 id="jdies">Jdies</h3>
+<blockquote>
+<p>Jedis简介</p>
+</blockquote>
+<p>Jedis是Java语言连接redis服务。</p>
+<hr>
+<h4 id="使用方式">使用方式</h4>
+<blockquote>
+<p>在pom文件中导入jedis的依赖。</p>
+</blockquote>
+<pre><code class="language-xml">        &lt;!-- jedis --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;redis.clients&lt;/groupId&gt;
+            &lt;artifactId&gt;jedis&lt;/artifactId&gt;
+            &lt;version&gt;3.2.0&lt;/version&gt;
+        &lt;/dependency&gt;
+
+</code></pre>
+<blockquote>
+<p>在类中进行连接</p>
+</blockquote>
+<pre><code class="language-java">        //1.连接redis
+        Jedis jedis = new Jedis(&quot;127.0.0.1&quot;, 6379);
+        //2.操作redis
+        jedis.set(&quot;name&quot;,&quot;squid&quot;);//Jedis中的方法名与redis中命令名完全一致
+        String name = jedis.get(&quot;name&quot;);
+        System.out.println(name);
+        //3.断开连接
+        jedis.close();
+
+</code></pre>
+<p>**注意：**从redis中取出的所有数据类型与java中的数据类型一一对应。</p>
+<hr>
+<h4 id="jedis工具类">Jedis工具类</h4>
+<pre><code class="language-java">public class JedisUtil {
+    private static JedisPool jedisPool = null;
+    private static Integer port = null;
+    private static Integer maxTotal = null;
+    private static Integer maxIdle = null;
+
+    static{
+        ResourceBundle resourceBundle = ResourceBundle.getBundle(&quot;redis&quot;);//获取配置文件
+        String host = resourceBundle.getString(&quot;redis.host&quot;);
+        port = Integer.valueOf(resourceBundle.getString(&quot;redis.port&quot;));
+        maxTotal = Integer.valueOf(resourceBundle.getString(&quot;redis.maxTotal&quot;));
+        maxIdle = Integer.valueOf(resourceBundle.getString(&quot;redis.maxIdle&quot;));
+
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(maxTotal);//最大连接数
+        jedisPoolConfig.setMaxIdle(maxIdle);//活动连接数
+        jedisPool = new JedisPool(jedisPoolConfig,host,port);
+    }
+    public static Jedis getJedis(){
+        return jedisPool.getResource();
+    }
+}
+
+</code></pre>
+<hr>
+<h2 id="redis高级">Redis高级</h2>
+<h3 id="linux环境下的redis">Linux环境下的Redis</h3>
+<h4 id="在linux环境中安装redis">在Linux环境中安装redis</h4>
+<blockquote>
+<p>下载安装包</p>
+</blockquote>
+<pre><code># wget http://download.redis.io/releases/redis-?.?.?.tar.gz
+
+</code></pre>
+<blockquote>
+<p>解压</p>
+</blockquote>
+<pre><code>tar -xvf 文件名.tar.gz
+
+</code></pre>
+<blockquote>
+<p>编译</p>
+</blockquote>
+<pre><code>make
+
+</code></pre>
+<blockquote>
+<p>安装</p>
+</blockquote>
+<pre><code>make install
+
+</code></pre>
+<hr>
+<h4 id="启动redis服务">启动Redis服务</h4>
+<blockquote>
+<p>直接启动</p>
+</blockquote>
+<ul>
+<li>进入redis下的src目录，打开redis-server</li>
+</ul>
+<pre><code># redis-server [port]
+
+</code></pre>
+<ul>
+<li>打开redis-cli</li>
+</ul>
+<pre><code># redis-cli [-h host] [-p port]
+
+</code></pre>
+<blockquote>
+<p>指定配置文件启动*</p>
+</blockquote>
+<ul>
+<li>
+<p>编写指定配置文件 xxx.conf</p>
+</li>
+<li>
+<p>打开服务时指定</p>
+</li>
+</ul>
+<pre><code># redis-server [配置文件]
+
+</code></pre>
+<hr>
+<h3 id="持久化">持久化</h3>
+<blockquote>
+<p>什么是持久化</p>
+</blockquote>
+<p>利用永久性存储介质将数据进行保存，在特定的时间将保存的数据进行恢复的工作机制称为永久化。</p>
+<blockquote>
+<p>持久化的方式</p>
+</blockquote>
+<ul>
+<li>将当前数据状态进行保存，快照形式，存储数据结果，存储格式简单，关注点在数据（RDB）</li>
+<li>将数据的操作过程进行保存，日志形式，存储操作过程，存储格式复杂，关注点在数据的操作过程（AOF）</li>
+</ul>
+<h4 id="rdb方式">RDB方式</h4>
+<blockquote>
+<p>命令</p>
+</blockquote>
+<pre><code>save	//作用：手动执行一次保存操作
+bgsave	//作用：手动启动后台保存操作，但不是立即执行
+save second changes		//作用：在一定时间内key的数量变化达到指定值时自动执行持久							化，后台是bgsave
+特殊形式：
+debug reload	//服务器运行过程中保存
+shutdown save	//关闭服务器时指定保存数据
+
+</code></pre>
+<p>**注意：**save指令的执行会阻塞当前Redis服务器，直到当前RDB过程完成为止，有可能会长时间阻塞，线上环境不建议使用；而bgsave是针对save阻塞问题做的优化，通过调用linux中的fork函数生成子进程保存，Redis中所有涉及到RDB操作都采用bgsave的方式，save命令可以放弃使用。</p>
+<blockquote>
+<p>save指令的相关配置</p>
+</blockquote>
+<ul>
+<li>
+<p>dbfilename dump.rdb</p>
+<p>说明：设置本地数据库文件名，默认值为dump.rdb</p>
+<p>经验：通常设置为dump-端口号.rdb</p>
+</li>
+<li>
+<p>dir</p>
+<p>说明：设置存储.rdb文件的路径</p>
+<p>经验：通常设置成存储空间较大的目录中，目录名称data</p>
+</li>
+<li>
+<p>rdbcompression yes</p>
+<p>说明：设置存储至本地数据库时是否压缩数据，默认为yes，采用LZF压缩</p>
+<p>经验：通常默认为开启状态，如果设置为no，可以节省CPU运行时间，但会使存储的文件变大（巨大）</p>
+</li>
+<li>
+<p>rdbchecksum yes</p>
+<p>说明：设置是否进行RDB文件格式校验，该校验过程在写文件和读文件过程均进行</p>
+<p>经验：通常默认为开启状态，如果设置为no，可以节约读写性能过程约10%时间消耗，但是存在一定的数据损坏风险</p>
+</li>
+<li>
+<p>stop-writes-on-bgsave-error yes</p>
+<p>说明：后台存储过程中如果出现错误现象，是否停止保存操作（bgsave的配置）</p>
+<p>经验：通常默认为开启状态</p>
+</li>
+</ul>
+<blockquote>
+<p>对比</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">方式</th>
+<th style="text-align:center">save指令</th>
+<th style="text-align:center">bgsave指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">读写</td>
+<td style="text-align:center">同步</td>
+<td style="text-align:center">异步</td>
+</tr>
+<tr>
+<td style="text-align:center">阻塞客户端指令</td>
+<td style="text-align:center">是</td>
+<td style="text-align:center">否</td>
+</tr>
+<tr>
+<td style="text-align:center">额外内存消耗</td>
+<td style="text-align:center">否</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td style="text-align:center">启动新进程</td>
+<td style="text-align:center">否</td>
+<td style="text-align:center">是</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>RDB的优缺点</p>
+</blockquote>
+<p>优点：</p>
+<ul>
+<li>RDB时一个紧凑压缩的二进制文件，存储效率较高</li>
+<li>RDB内部存储的时redis在某个时间点的数据快照，非常适合用于数据备份，全量复制等场景</li>
+<li>RDB恢复数据的速度要比AOF快很多</li>
+<li>应用：服务器中没X消失执行bgsave备份，并将RDB文件拷贝到远程机器中，用于灾难恢复</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>RDB方式无论是执行指令还是利用配置，无法做到实时持久化，具有较大可能性丢失数据</li>
+<li>bgsave指令每次运行要执行fork操作创建子进程，要牺牲掉一些性能</li>
+<li>Redis的众多版本中未进行RDB文件格式的版本同一，有可能出现各版本之间数据格式无法兼容现象</li>
+</ul>
+<hr>
+<h4 id="aof方式">AOF方式</h4>
+<blockquote>
+<p>概念</p>
+</blockquote>
+<ul>
+<li>AOF(append only file)持久化：以独立日志的方式记录每次写命令，重启时重新执行AOF文件中的命令已达到恢复数据的目的。与RDB相比可以简单描述为将记录数据转变为记录数据产生的过程。</li>
+<li>AOF的主要作用是解决了数据持久化的实时性，目前已经是Redis持久化的主流方案。</li>
+</ul>
+<blockquote>
+<p>AOF写数据的三种策略</p>
+</blockquote>
+<ul>
+<li>
+<p>always（每次）</p>
+<p>每次写入操作均同步到AOF文件中，数据零误差，性能较低</p>
+</li>
+<li>
+<p>everysec（每秒）</p>
+<p>每秒将缓冲区中的指令同步到AOF文件中，数据准确性较高，性能较高</p>
+<p>在系统突然宕机的情况下丢失1秒内的数据</p>
+</li>
+<li>
+<p>no（系统控制）</p>
+<p>由操作系统控制每次同步到AOF文件的周期，整体过程不可控</p>
+</li>
+</ul>
+<blockquote>
+<p>AOF功能开启</p>
+</blockquote>
+<ul>
+<li>配置</li>
+</ul>
+<pre><code class="language-linux">appendonly yes|no		//是否开启AOF持久化功能，默认为不开启状态
+appendfsync always|everysec|no		//AOF写数据策略
+appendfilename filename		//AOF持久化文件名，默认文件名为appendonly.aof,建议								  配置为appendonly-端口号.aof
+
+</code></pre>
+<hr>
+<h5 id="aof重写">AOF重写</h5>
+<blockquote>
+<p>作用</p>
+</blockquote>
+<ul>
+<li>降低磁盘占用量，提高磁盘利用率</li>
+<li>提高持久化效率，降低持久化写时间，提高IO性能</li>
+<li>降低数据恢复用时，提高数据恢复效率</li>
+</ul>
+<blockquote>
+<p>AOF重写方式</p>
+</blockquote>
+<ul>
+<li>手动重写</li>
+</ul>
+<pre><code class="language-linux">bgrewriteaof
+
+</code></pre>
+<ul>
+<li>自动重写</li>
+</ul>
+<pre><code>auto-aof-rewrite-min-size size
+auto-aof-rewrite-percentage percentage
+
+</code></pre>
+<hr>
+<h4 id="rdb与aof对比">RDB与AOF对比</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">持久化方式</th>
+<th style="text-align:center">RDB</th>
+<th style="text-align:center">AOF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">占用存储空间</td>
+<td style="text-align:center">小（数据级：压缩）</td>
+<td style="text-align:center">大（指令级：重写）</td>
+</tr>
+<tr>
+<td style="text-align:center">存储速度</td>
+<td style="text-align:center">慢</td>
+<td style="text-align:center">快</td>
+</tr>
+<tr>
+<td style="text-align:center">恢复速度</td>
+<td style="text-align:center">快</td>
+<td style="text-align:center">慢</td>
+</tr>
+<tr>
+<td style="text-align:center">数据安全性</td>
+<td style="text-align:center">会丢失数据</td>
+<td style="text-align:center">依据策略决定</td>
+</tr>
+<tr>
+<td style="text-align:center">资源消耗</td>
+<td style="text-align:center">高/重量级</td>
+<td style="text-align:center">低/轻量级</td>
+</tr>
+<tr>
+<td style="text-align:center">启动优先级</td>
+<td style="text-align:center">低</td>
+<td style="text-align:center">高</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="事务">事务</h3>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>Redis事务就是一个命令执行的队列，将一系列预定义命令包装成一个整体（一个队列）。当执行时，一次性按照添加顺序依次执行，中间不会被打断或者干扰。</p>
+<p>总结：一个队列中，一次性、顺序性、排他性的执行一系列命令。</p>
+<blockquote>
+<p>事务的基本操作</p>
+</blockquote>
+<pre><code>multi		//设置事务的开启位置，此指令执行后，后续的所有指令均加入到事务中
+exec		//设置事务的结束位置，同时执行事务。与multi成对出现，成对使用
+discard		//终止当前事务的定义，发生在multi之后，exec之前
+
+</code></pre>
+<p>**注意：**已经执行完毕的命令对应的数据不会自动回滚，需要程序员在代码中实现回滚。</p>
+<blockquote>
+<p>锁</p>
+</blockquote>
+<p>事务锁：</p>
+<pre><code>watch key1 [key2...]	//对key添加监视锁，在执行exec前如果key发生了变化，终止事							务执行
+unwatch					//取消对所有key的监视
+
+</code></pre>
+<p>分布式锁：</p>
+<pre><code>setnx lock-key value	//使用setnx设置一个公共锁
+del lock-key			//删除一个公共锁
+添加时间设定的锁：
+expire lock-key second
+pexpire lock-key milliseconds
+
+</code></pre>
+<p>​		利用setnx命令的返回值特征，有值返回则设置失败，无值返回则设置成功：</p>
+<p>​				1.对于返回设置成功的，拥有控制权，进行下一步的具体业务操作</p>
+<p>​				2.对于返回设置失败的，不具有控制权，排队或等待</p>
+<hr>
+<h3 id="删除策略">删除策略</h3>
+<h4 id="数据删除策略">数据删除策略</h4>
+<blockquote>
+<p>Redis中数据的特征</p>
+</blockquote>
+<p>Redis是一种内存级数据库，所有数据均存放在内存中，内存中的数据可以通过TTL指令获取其状态</p>
+<ul>
+<li>XX：具有时效性的数据</li>
+<li>-1：永久有效的数据</li>
+<li>-2：已经过期的数据或被删除的数据、未定义的数据</li>
+</ul>
+<blockquote>
+<p>Redis中时效性数据的存储结构</p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis.assets%5Cimage-20200303190338409.png" alt="image-20200303190338409" loading="lazy"></figure>
+<blockquote>
+<p>目标</p>
+</blockquote>
+<p>在内存占用与CPU占用之间寻找一种平衡，顾此失彼都会造成整体redis性能的下降，甚至引发服务器宕机或内存泄漏</p>
+<hr>
+<h5 id="定时删除">定时删除</h5>
+<ul>
+<li>创建一个定时器，当key设置有过期时间，且过期时间到达时，由定时器任务立即执行对键的删除操作。</li>
+<li>优点：节约内存，到时就删除，快速释放掉不必要的内存占用</li>
+<li>缺点：CPU压力很大，无论CPU此时负载多高，均占用CPU，会影响Redis服务器响应时间和指令吞吐量</li>
+<li>总结：用处理器性能换取存储空间</li>
+</ul>
+<hr>
+<h5 id="惰性删除">惰性删除</h5>
+<ul>
+<li>数据到达过期时间，不做处理，等下次访问该数据时删除</li>
+<li>优点：节约CPU性能，发现必须删除的时候才删除</li>
+<li>缺点：内存压力很大，出现长期占用内存的数据</li>
+<li>总结：用存储空间换取处理器性能</li>
+</ul>
+<hr>
+<h5 id="定期删除">定期删除</h5>
+<pre><code>* Redis启动服务器初始化时，读取配置server.hz的值，默认为10
+* 每秒钟执行server.hz次 serverCron() -&gt; databaseCron() -&gt; activeExpireCycle()
+* activeExpireCycle()对每个expire[*]（每个数据库对应一个expire）逐一进行检测，每	次执行250ms/server.hz
+* 对某个expires[*]检测时，随机挑选W个key检测
+      * 如果key超时，删除key
+      * 如果一轮中删除的kshaney的数量&gt;W*25%，循环该过程
+      * 如果一轮中删除的kshaney的数量≤W*25%，检查下一个expire[\*]，0-15循环
+      * W取值=ACTIVE_EXPIRE_CYCLE_LOOKUPS_PER_LOOP属性值
+* 参数current_db用于记录activeExpireCycle()进入哪个expire[*]执行
+
+</code></pre>
+<ul>
+<li>周期性轮询redis库中的时效性数据，采用随机抽取的策略，利用过期数据占比的方式控制删除频度</li>
+<li>特点1：CPU性能占用设置有峰值，检测频度可以自定义设置</li>
+<li>特点2：内存压力不是很大，长期占用内存的冷数据会被持续清理</li>
+<li>总结：周期性抽查存储空间</li>
+</ul>
+<p><strong>在Redis中，同时使用 惰性删除 与 定期删除 两种策略。</strong></p>
+<hr>
+<h4 id="数据逐出策略">数据逐出策略</h4>
+<blockquote>
+<p>什么是逐出算法</p>
+</blockquote>
+<p>Redis使用内存存储数据，在执行每一个命令前，会调用freeMemoryIfNeeded()检测内存是否充足。如果内存不满足新加入数据的最低存储要求，redis会临时删除一些数据为当前指令清理内存空间。清理数据的策略称为逐出算法。</p>
+<p>**注意：**逐出数据的过程不是100%能够清理出足够的可使用的内存空间，如果不成功则反复执行。当对所有数据尝试完毕后，如果不能达到内存清理的要求，将出现错误信息。</p>
+<blockquote>
+<p>影像数据逐出的相关配置</p>
+</blockquote>
+<pre><code>maxmemory			//最大可使用内存，为物理占用内存的比例，默认0，生产环境中一般					设置50%以上
+maxmemory-samples	//每次选取待删除数据的个数
+maxmemory-policy	//达到最大内存后的逐出策略
+
+</code></pre>
+<p>可选的逐出策略：</p>
+<ul>
+<li>检测易失数据（可能会过期的数据集server.db[i].expires）</li>
+</ul>
+<ol>
+<li>volatile-lru：挑选最近使用时间最少的数据</li>
+<li>volatile-lfu：挑选最近使用次数最少的数据</li>
+<li>volatile-ttl：挑选将要过期的数据</li>
+<li>volatile-random：任意选择数据</li>
+</ol>
+<ul>
+<li>检测全库数据（所有数据集server.db[i].dict）</li>
+</ul>
+<ol>
+<li>allkeys-lru：挑选最近使用时间最少的数据</li>
+<li>allkeys-lfu：挑选最近使用次数最少的数据</li>
+<li>allkeys-random：任意选择数据</li>
+</ol>
+<ul>
+<li>放弃数据驱逐</li>
+</ul>
+<ol>
+<li>no-enviction：禁止驱逐，会引发OOM</li>
+</ol>
+<hr>
+<h3 id="服务器配置">服务器配置</h3>
+<blockquote>
+<p>基础配置</p>
+</blockquote>
+<pre><code>daemonize yes|no			//设置服务器以守护进程的方式运行
+bind 127.0.0.1				//绑定主机地址
+port 6379					//设置服务器端口号
+databases 16				//设置数据库数量
+
+</code></pre>
+<blockquote>
+<p>日志配置</p>
+</blockquote>
+<pre><code>loglevel debug|verbose|notice|warning		//设置服务器的日志级别
+logfile	端口号.log							 //日志记录文件名
+
+</code></pre>
+<blockquote>
+<p>客户端配置</p>
+</blockquote>
+<pre><code>maxclients 0				//设置同一时间最大客户端连接数
+timeout						//客户端闲置等待最大时常，达到最大值后关闭连接，关闭								设置为0
+
+</code></pre>
+<blockquote>
+<p>多服务器快捷配置</p>
+</blockquote>
+<pre><code>include /path/server-端口号.conf	//导入并加载指定配置文件信息
+
+</code></pre>
+<hr>
+<h3 id="高级数据类型">高级数据类型</h3>
+<h4 id="bitmaps">Bitmaps</h4>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>Redis提供了Bitmaps这个“数据结构”可以实现对位的操作。 把数据结构加上引号主要因为：</p>
+<ul>
+<li>Bitmaps本身不是一种数据结构，实际上它就是字符串，但是它可以对字符串的位进行操作。</li>
+<li>Bitmaps单独提供了一套命令，所以在Redis中使用Bitmaps和使用字符串的方法不太相同。 可以把Bitmaps想象成一个以位为单位的数组，数组的每个单元只能存储0和1，数组的下标在Bitmaps中叫做偏移量。</li>
+</ul>
+<p>总结：设置对应的bit串，每一位的0/1值作为判定条件。如1010001，每一位对应一个用户是否访问。</p>
+<blockquote>
+<p>操作</p>
+</blockquote>
+<pre><code>getbit key offset				//获取指定key对应偏移量上的bit值
+setbit key offset value			//设置指定key对应偏移量上的bit值，取0或1
+bitcount key [start end]		//计算指定key中1的数量
+bitop op destkey key1 [key2...]	//对指定key进行位运算并将结果保存在destkey中
+	op的取值：and|or|not|xor
+
+</code></pre>
+<hr>
+<h4 id="hyperloglog">HyperLogLog</h4>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>HyperLogLog是用于统计基数的。</p>
+<p>基数：集合去重后的元素个数。如：{1,3,5,7,5,7,8}的基数为{1,3,5,7,8}</p>
+<blockquote>
+<p>操作</p>
+</blockquote>
+<pre><code>pfadd key element [element...]				//添加数据
+pfcount key [key...]						//统计数据
+pfmerge destkey sourcekey [sourcekey...]	//合并数据
+
+</code></pre>
+<p><strong>注意：</strong></p>
+<ul>
+<li>用于进行基数统计，不是集合，不是保存数据，只记录数量而不是记录数据</li>
+<li>核心是基数估算算法，最终数值存在一定误差</li>
+<li>误差范围：基数估计是结果是一个带有0.81%标准错误的近似值</li>
+<li>耗空间极小，每个HyperLogLog key占用了12K的内存用于标记基数</li>
+<li>pfadd命令不是一次性分配12K内存使用，会随着基数的增加内存而增大</li>
+<li>pfmerge命令合并后占用的存储空间为12K，无论合并之前数据量多少</li>
+</ul>
+<hr>
+<h4 id="geo">GEO</h4>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>GEO可以用于存储位置信息。</p>
+<blockquote>
+<p>操作</p>
+</blockquote>
+<pre><code>geoadd key longitude latitude member [longitude latitude member...]			  //添加坐标点
+geopos key member [member...]		//获取坐标点
+geodist key member1 member2 [unit]	//计算坐标点距离
+georadius key longitude latitude radius m|km|ft|mi [withcoord] [withdist] [withhash] [count count]			  //根据坐标求范围内的数据
+georadiusbymember key member radius m|km|ft|mi [withcoord] [withdist] [withhash] [count count]			  //根据点求范围内的数据
+geohash key member [member...]		//获取指定点对应的坐标hash值
+
+</code></pre>
+<hr>
+<h2 id="redis集群">Redis集群</h2>
+<h3 id="主从复制">主从复制</h3>
+<p><a href="https://www.cnblogs.com/wade-luffy/p/9639986.html">相关文档</a></p>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>主从复制，是指将一台Redis服务器的数据，复制到其他的Redis服务器。前者称为主节点(master/leader)，后者称为从节点(slave/follower)；数据的复制是单向的，只能由主节点到从节点。</p>
+<p>主从复制的作用主要包括：</p>
+<ol>
+<li>数据冗余：主从复制实现了数据的热备份，是持久化之外的一种数据冗余方式。</li>
+<li>故障恢复：当主节点出现问题时，可以由从节点提供服务，实现快速的故障恢复；实际上是一种服务的冗余。</li>
+<li>负载均衡：在主从复制的基础上，配合读写分离，可以由主节点提供写服务，由从节点提供读服务（即写Redis数据时应用连接主节点，读Redis数据时应用连接从节点），分担服务器负载；尤其是在写少读多的场景下，通过多个从节点分担读负载，可以大大提高Redis服务器的并发量。</li>
+<li>高可用基石：除了上述作用以外，主从复制还是哨兵和集群能够实施的基础，因此说主从复制是Redis高可用的基础。</li>
+</ol>
+<hr>
+<h4 id="工作流程">工作流程</h4>
+<p>主从复制过程大体可以分为三个阶段：</p>
+<ol>
+<li>建立连接阶段（即准备阶段）</li>
+<li>数据同步阶段</li>
+<li>命令传播阶段</li>
+</ol>
+<figure data-type="image" tabindex="2"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis.assets%5Cimage-20200304164926241.png" alt="image-20200304164926241" loading="lazy"></figure>
+<h5 id="阶段1建立连接阶段工作流程">阶段1：建立连接阶段工作流程</h5>
+<p>步骤：</p>
+<ol>
+<li>设置master的地址和端口，保存master信息</li>
+<li>建立socket连接</li>
+<li>发送ping命令（定时器任务）</li>
+<li>身份验证</li>
+<li>发送slave端口信息</li>
+</ol>
+<p>状态：</p>
+<ul>
+<li>slave：保存master的地址与端口</li>
+<li>master：保存slave的端口</li>
+</ul>
+<p>总体：之间创建了连接的socket</p>
+<figure data-type="image" tabindex="3"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis.assets%5Cimage-20200304171900063.png" alt="image-20200304171900063" loading="lazy"></figure>
+<blockquote>
+<p>主从连接方式</p>
+</blockquote>
+<p>方式一：客户端发送指令</p>
+<pre><code>slaveof &lt;masterip&gt; &lt;masterport&gt;
+
+</code></pre>
+<p>方式二：启动服务器时携带参数</p>
+<pre><code>redis-server --slaveof &lt;masterip&gt; &lt;masterport&gt;
+
+</code></pre>
+<p>方式三：服务器配置*</p>
+<pre><code>slaveof &lt;masterip&gt; &lt;masterport&gt;
+
+</code></pre>
+<p>断开连接方式：slaveof no one</p>
+<hr>
+<h5 id="阶段2数据同步阶段工作流程">阶段2：数据同步阶段工作流程</h5>
+<p>步骤：</p>
+<ol>
+<li>请求同步数据</li>
+<li>创建RDB同步数据</li>
+<li>恢复RDB同步数据</li>
+<li>请求部分同步数据</li>
+<li>恢复部分同步数据</li>
+</ol>
+<p>状态：</p>
+<ul>
+<li>slave：具有master端全部数据，包括RDB过程接收的数据</li>
+<li>master：保存slave当前数据同步的位置</li>
+</ul>
+<p>总体：之间完成了数据克隆</p>
+<figure data-type="image" tabindex="4"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis.assets%5Cimage-20200305152146724.png" alt="image-20200305152146724" loading="lazy"></figure>
+<blockquote>
+<p>说明</p>
+</blockquote>
+<p>master：</p>
+<ol>
+<li>如果master数据量巨大，数据同步阶段应避开流量高峰期，避免造成master阻塞，影响业务正常执行</li>
+<li>复制缓冲区大小设定不合理，会造成数据溢出。如进行全量复制周期太长，进行部分复制时发现数据已经存在丢失的情况，必须进行第二次全量复制，致使slave陷入死循环状态。</li>
+</ol>
+<pre><code>repl-backlog-size 1mb
+
+</code></pre>
+<ol start="3">
+<li>master单机内存占用主机内存的比例不应过大，建议使用50%-70%的内存，留下30%-50%的内存用于执行bgsave命令和创建复制缓冲区</li>
+</ol>
+<p>slave：</p>
+<ol>
+<li>为避免slave进行全量复制、部分复制时服务器响应阻塞或数据不同步，建议关闭此期间的对外服务</li>
+</ol>
+<pre><code>slave-serve-stale-data yes|no
+
+</code></pre>
+<ol start="2">
+<li>数据同步阶段，master发送给slave信息可以理解为master是slave的一个客户端，主动向slave发送命令</li>
+<li>多个slave同时对master请求数据同步，master发送的RDB文件增多，会对带宽造成巨大冲击，如果master带宽不足，因此数据同步需要根据业务需求，适量错峰</li>
+<li>slave过多时，建议调整拓扑结构，由一主多从结构变为树状结构，中间节点即是master，也是slave。注意使用树状结构时，由于层级深度，导致深度越高的slave与最顶层master间数据同步延迟较大，数据一致性变差，应谨慎选择</li>
+</ol>
+<h6 id="部分复制的三个核心要素">部分复制的三个核心要素</h6>
+<blockquote>
+<p>服务器的运行id</p>
+</blockquote>
+<p>概念：服务器的运行ID是每一台服务器每次运行的身份识别码，一台服务器多次运行可以生成多个运行id</p>
+<p>组成：运行id由40位字符组成，是一个随机的十六进制字符</p>
+<p>作用：运行id被用于在服务器间进行传输，识别身份</p>
+<p>实现方式：运行id在每台服务器启动时自动生成，master在首次连接slave时，会将自己的运行id发送给slave，slave保存此id，通过info Server命令，可以查看节点的runid</p>
+<blockquote>
+<p>复制缓冲区</p>
+</blockquote>
+<p>概念：复制缓冲区，又名复制积压区，是一个先进先出的队列，用于存储服务器执行的命令，每次传播命令，master都会将传播的命令记录下来，并存储在复制缓冲区中（默认大小1M）</p>
+<p>组成：偏移量、字节值</p>
+<p>作用：用于保存master收到的所有指令（仅影响数据变更的指令）</p>
+<p>数据来源：当master接收到主客户端的指令时，除了将指令执行，会将该指令存储到缓冲区中</p>
+<blockquote>
+<p>复制偏移量</p>
+</blockquote>
+<p>概念：一个数字，描述复制缓冲区中的指令字节位置</p>
+<p>分类：</p>
+<ul>
+<li>master复制偏移量：记录发送给所有slave的指令字节对应的位置（多个）</li>
+<li>slave复制偏移量：记录slave接收master发送过来的指令字节的位置（一个）</li>
+</ul>
+<p>数据来源：</p>
+<ul>
+<li>master：发送一次记录一次</li>
+<li>slave端：接收一次记录一次</li>
+</ul>
+<p>作用：信息同步，对比master与slave的差异，当slave断线后，恢复数据使用</p>
+<hr>
+<h5 id="授权访问">授权访问</h5>
+<p>master：</p>
+<pre><code>配置文件中：
+require &lt;password&gt;
+执行时：
+config set requirepass &lt;password&gt;
+config get requirepass
+</code></pre>
+<p>slave:</p>
+<pre><code>配置文件中：
+masterauth &lt;password&gt;
+启动时：
+redis-cli -a &lt;password&gt;
+执行时：
+auth &lt;password&gt;
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://liuyuzheng8.github.io/tag/i5L1NzG9C/" class="tag">
+                    数据库
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://liuyuzheng8.github.io/post/springboot/">
+                  <h3 class="post-title">
+                    SpringBoot
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
