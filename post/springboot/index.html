@@ -1,13 +1,20 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" >
+
 <title>SpringBoot | Iktsuarpok</title>
-<link rel="shortcut icon" href="https://liuyuzheng8.github.io/favicon.ico?v=1583412166415">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://liuyuzheng8.github.io/favicon.ico?v=1583412284366">
 <link rel="stylesheet" href="https://liuyuzheng8.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="SpringBoot | Iktsuarpok - Atom Feed" href="https://liuyuzheng8.github.io/atom.xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
 
 
@@ -15,68 +22,63 @@
 什么是 SpringBoot
 SpringBoot是一个javaweb的开发框架，和SpringMVC类似，对比其他javaweb框架的好处，官方说是简化开发，约定大于配置， you can &quot;just ru..." />
     <meta name="keywords" content="框架" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://liuyuzheng8.github.io">
-  <img class="avatar" src="https://liuyuzheng8.github.io/images/avatar.png?v=1583412166415" alt="">
-  </a>
-  <h1 class="site-title">
-    Iktsuarpok
-  </h1>
-  <p class="site-description">
-    个人学习笔记
-  </p>
-  <div class="menu-container">
-    
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://liuyuzheng8.github.io">
+        <img src="https://liuyuzheng8.github.io/images/avatar.png?v=1583412284366" class="site-logo">
+        <h1 class="site-title">Iktsuarpok</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
       
-        <a href="https://liuyuzheng8.github.io/post/redis-bi-ji" class="menu">
-          Redis
-        </a>
+        
+          <a href="https://liuyuzheng8.github.io/post/redis-bi-ji" class="site-nav">
+            Redis
+          </a>
+        
       
-    
+    </div>
   </div>
-  <div class="social-container">
-    
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
+      
+    </div>
+    <div class="site-description">
+      个人学习笔记
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://liuyuzheng8.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
   </div>
 </div>
 
-        <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              SpringBoot
-            </h2>
-            <div class="post-info">
-              <span>
-                2020-03-05
-              </span>
-              <span>
-                44 min read
-              </span>
-              
-                <a href="https://liuyuzheng8.github.io/tag/aA-yofVdw/" class="post-tag">
-                  # 框架
-                </a>
-              
-            </div>
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">SpringBoot</h2>
+            <div class="post-date">2020-03-05</div>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <h1 id="springboot">SpringBoot</h1>
+            <div class="post-content" v-pre>
+              <h1 id="springboot">SpringBoot</h1>
 <h2 id="什么是-springboot">什么是 SpringBoot</h2>
 <p>SpringBoot是一个javaweb的开发框架，和SpringMVC类似，对比其他javaweb框架的好处，官方说是简化开发，约定大于配置， you can &quot;just run&quot;，能迅速的开发web应用，几行代码开发一个http接口</p>
 <p>Spring Boot 基于 Spring 开发，Spirng Boot 本身并不提供 Spring 框架的核心特性以及扩展功能，只是用于快速、敏捷地开发新一代基于 Spring 框架的应用程序。也就是说，它并不是用来替代 Spring 的解决方案，而是和 Spring 框架紧密结合用于提升 Spring 开发者体验的工具。Spring Boot 以<strong>约定大于配置的核心思想</strong>，默认帮我们进行了很多设置，多数 Spring Boot 应用只需要很少的 Spring 配置。同时它集成了大量常用的第三方库配置（例如 Redis、MongoDB、Jpa、RabbitMQ、Quartz 等等），Spring Boot 应用中这些第三方库几乎可以零配置的开箱即用，</p>
@@ -1618,175 +1620,44 @@ spring.mail.properties.mail.smtp.ssl.enable=true
 </ol>
 <p>cron 表达式参考： https://www.cnblogs.com/tommyli/p/3760671.html</p>
 
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li><a href="#springboot">SpringBoot</a>
-<ul>
-<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF-springboot">什么是 SpringBoot</a></li>
-<li><a href="#%E7%AC%AC%E4%B8%80%E4%B8%AA-springboot-%E7%A8%8B%E5%BA%8F">第一个 SpringBoot 程序</a>
-<ul>
-<li><a href="#%E6%AD%A5%E9%AA%A4">步骤：</a></li>
-</ul>
-</li>
-<li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">配置文件</a>
-<ul>
-<li><a href="#yaml">Yaml</a>
-<ul>
-<li><a href="#yaml%E7%9A%84%E6%A0%87%E5%87%86%E8%AF%AD%E6%B3%95">Yaml的标准语法</a></li>
-</ul>
-</li>
-<li><a href="#yaml%E5%90%91%E5%AE%9E%E4%BD%93%E7%B1%BB%E6%B3%A8%E5%85%A5%E5%B1%9E%E6%80%A7%E5%80%BC">Yaml向实体类注入属性值</a>
-<ul>
-<li><a href="#yaml-%E4%B8%8E-properties-%E6%96%87%E4%BB%B6%E6%B3%A8%E5%85%A5%E7%9A%84%E5%8C%BA%E5%88%AB">Yaml 与 properties 文件注入的区别</a></li>
-<li><a href="#jsr303-%E6%95%B0%E6%8D%AE%E6%A0%A1%E9%AA%8C">JSR303 数据校验</a>
-<ul>
-<li><a href="#bean-validation-%E4%B8%AD%E5%86%85%E7%BD%AE%E7%9A%84-constraint">Bean Validation 中内置的 constraint</a></li>
-<li><a href="#hibernate-validator-%E9%99%84%E5%8A%A0%E7%9A%84-constraint"><strong>Hibernate Validator 附加的 constraint</strong></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#%E5%A4%9A%E7%8E%AF%E5%A2%83%E5%88%87%E6%8D%A2">多环境切换</a>
-<ul>
-<li><a href="#%E6%96%B9%E5%BC%8F%E4%B8%80%E7%BC%96%E5%86%99%E5%A4%9A%E4%B8%AA-properties-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">方式一：编写多个 properties 配置文件</a></li>
-<li><a href="#%E6%96%B9%E5%BC%8F%E4%BA%8Cyaml-%E7%9A%84%E5%A4%9A%E6%96%87%E6%A1%A3%E5%9D%97">方式二：Yaml 的多文档块</a></li>
-</ul>
-</li>
-<li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E4%BD%8D%E7%BD%AE">配置文件加载位置</a></li>
-<li><a href="#%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90">自动配置原理分析</a><br>
-*
-<ul>
-<li><a href="#%E6%80%BB%E7%BB%93"><strong>总结：</strong></a></li>
-<li><a href="#conditional">@Conditional</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#springboot-web%E5%BC%80%E5%8F%91">SpringBoot Web开发</a>
-<ul>
-<li><a href="#%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E6%98%A0%E5%B0%84%E8%A7%84%E5%88%99">静态资源映射规则</a></li>
-<li><a href="#%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E">模板引擎</a>
-<ul>
-<li><a href="#thymeleaf-%E8%AF%AD%E6%B3%95">Thymeleaf 语法</a>
-<ul>
-<li><a href="#%E4%BD%BF%E7%94%A8-thattr-%E6%9D%A5%E6%9B%BF%E6%8D%A2-html-%E4%B8%AD%E5%8E%9F%E7%94%9F%E7%9A%84%E5%B1%9E%E6%80%A7%E5%80%BC">使用 th:attr 来替换 Html 中原生的属性值。</a></li>
-<li><a href="#%E6%A8%A1%E6%9D%BF%E5%B8%83%E5%B1%80">模板布局</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#spring-mvc-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE">Spring MVC 自动配置</a><br>
-*
-<ul>
-<li><a href="#contentnegotiatingviewresolver">ContentNegotiatingViewResolver</a></li>
-<li><a href="#%E8%BD%AC%E6%8D%A2%E5%99%A8%E5%92%8C%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%99%A8">转换器和格式化器</a></li>
-<li><a href="#%E6%89%A9%E5%B1%95%E4%BD%BF%E7%94%A8-springmvc">扩展使用 SpringMVC</a></li>
-<li><a href="#%E5%9B%BD%E9%99%85%E5%8C%96">国际化</a></li>
-<li><a href="#%E6%8B%A6%E6%88%AA%E5%99%A8">拦截器</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE">数据访问</a>
-<ul>
-<li><a href="#jdbc">JDBC</a></li>
-<li><a href="#druid">Druid</a></li>
-<li><a href="#%E6%95%B4%E5%90%88-mybatis">整合 Mybatis</a></li>
-</ul>
-</li>
-<li><a href="#%E5%AE%89%E5%85%A8%E6%A1%86%E6%9E%B6">安全框架</a>
-<ul>
-<li><a href="#springsecurity">SpringSecurity</a></li>
-<li><a href="#shiro">Shiro</a>
-<ul>
-<li><a href="#%E7%AE%80%E4%BB%8B">简介：</a></li>
-<li><a href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5">核心概念</a></li>
-<li><a href="#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B">快速开始：</a></li>
-<li><a href="#shiro-%E6%95%B4%E5%90%88-springboot">Shiro 整合 SpringBoot</a></li>
-<li><a href="#shiro-%E6%95%B4%E5%90%88-thymeleaf">Shiro 整合 Thymeleaf</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#swagger">Swagger</a>
-<ul>
-<li><a href="#%E4%BB%8B%E7%BB%8D">介绍：</a></li>
-<li><a href="#%E5%9C%A8-springboot-%E4%B8%AD%E4%BD%BF%E7%94%A8-swagger">在 SpringBoot 中使用 Swagger</a></li>
-<li><a href="#%E9%85%8D%E7%BD%AE-swagger-%E4%BF%A1%E6%81%AF">配置 Swagger 信息</a></li>
-<li><a href="#%E9%85%8D%E7%BD%AE-swagger-%E9%85%8D%E7%BD%AE%E6%89%AB%E6%8F%8F%E6%8E%A5%E5%8F%A3">配置 Swagger 配置扫描接口</a></li>
-<li><a href="#%E9%85%8D%E7%BD%AE-api-%E6%96%87%E6%A1%A3%E7%9A%84%E5%88%86%E7%BB%84">配置 API 文档的分组</a></li>
-</ul>
-</li>
-<li><a href="#%E4%BB%BB%E5%8A%A1">任务</a>
-<ul>
-<li><a href="#%E5%BC%82%E6%AD%A5%E4%BB%BB%E5%8A%A1">异步任务</a></li>
-<li><a href="#%E9%82%AE%E4%BB%B6%E4%BB%BB%E5%8A%A1">邮件任务</a></li>
-<li><a href="#%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1">定时任务</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-              </div>
             </div>
-          </article>
+            
+              <div class="tag-container">
+                
+                  <a href="https://liuyuzheng8.github.io/tag/aA-yofVdw/" class="tag">
+                    框架
+                  </a>
+                
+              </div>
+            
+            
+
+            
+
+          </div>
+
         </div>
-
-        
-
-        
-
-        <div class="site-footer">
-  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://liuyuzheng8.github.io/atom.xml" target="_blank">
-    <i class="ri-rss-line"></i> RSS
-  </a>
-</div>
-
       </div>
     </div>
 
-    <script>
-      hljs.initHighlightingOnLoad()
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
 
-      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+AOS.init();
 
-      // This should probably be throttled.
-      // Especially because it triggers during smooth scrolling.
-      // https://lodash.com/docs/4.17.10#throttle
-      // You could do like...
-      // window.addEventListener("scroll", () => {
-      //    _.throttle(doThatStuff, 100);
-      // });
-      // Only not doing it here to keep this Pen dependency-free.
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
-      window.addEventListener("scroll", event => {
-        let fromTop = window.scrollY;
+</script>
 
-        mainNavLinks.forEach((link, index) => {
-          let section = document.getElementById(decodeURI(link.hash).substring(1));
-          let nextSection = null
-          if (mainNavLinks[index + 1]) {
-            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-          }
-          if (section.offsetTop <= fromTop) {
-            if (nextSection) {
-              if (nextSection.offsetTop > fromTop) {
-                link.classList.add("current");
-              } else {
-                link.classList.remove("current");    
-              }
-            } else {
-              link.classList.add("current");
-            }
-          } else {
-            link.classList.remove("current");
-          }
-        });
-      });
 
-    </script>
+
+
+
+
   </body>
 </html>
