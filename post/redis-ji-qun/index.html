@@ -1,0 +1,756 @@
+
+<html>
+  <head lang="zh">
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+        <meta content="yes" name="apple-mobile-web-app-capable"/>
+        <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+        <meta content="telephone=no" name="format-detection"/>
+        <meta name="renderer" content="webkit">
+    <title>Redis集群 | Iktsuarpok</title>
+<link href="https://liuyuzheng8.github.io/styles/main.css" type="text/css" rel="stylesheet"/>
+<script type="text/javascript" src="https://liuyuzheng8.github.io/media/scripts/jquery.js"></script>
+<script type="text/javascript" src="https://liuyuzheng8.github.io/media/scripts/basic.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  </head>
+
+  <body>
+     <div class="header">
+      <div class="logo_title">
+		  
+        <div class="title animated fadeInDown"><img src="https://liuyuzheng8.github.io/images/avatar.png?v=1583500720529"/>
+
+          <h1 title="Iktsuarpok" class="weaklink"><a href="/">Iktsuarpok</a>
+
+          </h1>
+
+          <div class="navbar weaklink">
+            <div class="normal_nav">
+
+<div class="bitcron_nav_container">
+
+
+  <div class="bitcron_nav">
+    <div class="mixed_site_nav_wrap site_nav_wrap">
+		
+      <ul class="mixed_site_nav site_nav sm sm-base">
+ 
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io" class="selected active current nav__item" >首页</a>
+
+  </li>
+ 
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io/tags" class="selected active current nav__item" >标签</a>
+
+  </li>
+ 
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io/archives" class="selected active current nav__item" >归档</a>
+
+  </li>
+ 
+
+      </ul>
+
+      <div class="clear clear_nav_inline_end"></div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="clear clear_nav_end"></div>
+
+</div>
+
+            </div>
+
+            <div class="hamberger"><i class="fa fa-bars"></i>
+<i class="fa fa-times"></i>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="hidden_nav animated fadeInDown">
+
+<div class="bitcron_nav_container">
+
+
+  <div class="bitcron_nav">
+    <div class="mixed_site_nav_wrap site_nav_wrap">
+      <ul class="mixed_site_nav site_nav sm sm-base">
+		  
+	
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io" class="selected active current nav__item" >首页</a>
+
+  </li>
+
+
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io/tags" class="selected active current nav__item" >标签</a>
+
+  </li>
+
+
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io/archives" class="selected active current nav__item" >归档</a>
+
+  </li>
+
+
+
+
+
+      </ul>
+
+      <div class="clear clear_nav_inline_end"></div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="clear clear_nav_end"></div>
+
+</div>
+
+      </div>
+
+    </div>
+
+
+    <div class="main">
+      <div class="main-inner">
+
+
+<div class="content">
+
+
+
+
+
+
+  <div class="post_page" >
+
+<div class="post">
+  <div class="post_title sm_margin">
+    <h2><a>Redis集群</a>
+
+
+
+    </h2>
+  </div>
+
+  <div class="post_details">
+    <div class="info"><i class="fa fa-clock-o"></i>
+<span class="date_info">2020-03-06</span>
+<i class="fa fa-eye"></i>
+
+<span class="date_info"><span id="busuanzi_value_page_pv"></span> Views</span>
+
+
+<i class="fa fa-bookmark-o"></i>
+<span class="tags_info weaklink">
+	
+	<a href="https://liuyuzheng8.github.io/tag/i5L1NzG9C/" class="tag">数据库</a>
+
+	<a href="https://liuyuzheng8.github.io/tag/Pwkspp1Yt/" class="tag">Redis</a>
+
+
+</span>
+
+
+    </div>
+
+  </div>
+
+
+
+
+
+  <div class="post_content markdown"><p class="md_block">
+    <span class="md_line md_line_start md_line_end"><h1 id="redis集群">Redis集群</h1>
+<h2 id="主从复制">主从复制</h2>
+<p><a href="https://www.cnblogs.com/wade-luffy/p/9639986.html">相关文档</a></p>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>主从复制，是指将一台Redis服务器的数据，复制到其他的Redis服务器。前者称为主节点(master/leader)，后者称为从节点(slave/follower)；数据的复制是单向的，只能由主节点到从节点。</p>
+<p>主从复制的作用主要包括：</p>
+<ol>
+<li>数据冗余：主从复制实现了数据的热备份，是持久化之外的一种数据冗余方式。</li>
+<li>故障恢复：当主节点出现问题时，可以由从节点提供服务，实现快速的故障恢复；实际上是一种服务的冗余。</li>
+<li>负载均衡：在主从复制的基础上，配合读写分离，可以由主节点提供写服务，由从节点提供读服务（即写Redis数据时应用连接主节点，读Redis数据时应用连接从节点），分担服务器负载；尤其是在写少读多的场景下，通过多个从节点分担读负载，可以大大提高Redis服务器的并发量。</li>
+<li>高可用基石：除了上述作用以外，主从复制还是哨兵和集群能够实施的基础，因此说主从复制是Redis高可用的基础。</li>
+</ol>
+<hr>
+<h3 id="工作流程">工作流程</h3>
+<p>主从复制过程大体可以分为三个阶段：</p>
+<ol>
+<li>建立连接阶段（即准备阶段）</li>
+<li>数据同步阶段</li>
+<li>命令传播阶段</li>
+</ol>
+<figure data-type="image" tabindex="1"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306204513274.png" alt="image-20200306204513274" loading="lazy"></figure>
+<h4 id="阶段1建立连接阶段工作流程">阶段1：建立连接阶段工作流程</h4>
+<p>步骤：</p>
+<ol>
+<li>slave端设置master的地址与端口，通过slaveof ip port与master相互连接，在slave端保存master相应的信息</li>
+<li>建立socket连接，用于master与slave端传递信息</li>
+<li>slave周期性的对master发送ping命令（定时器任务），保证master在线</li>
+<li>如果master设置了密码，进行身份验证</li>
+<li>slave将端口信息发送给master，master保存slave的端口信息</li>
+</ol>
+<p>状态：</p>
+<ul>
+<li>slave：保存master的地址与端口</li>
+<li>master：保存slave的端口</li>
+</ul>
+<p>总体：之间创建了连接的socket</p>
+<figure data-type="image" tabindex="2"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306210130500.png" alt="" loading="lazy"></figure>
+<blockquote>
+<p>主从连接方式</p>
+</blockquote>
+<p>方式一：客户端发送指令</p>
+<pre><code>slaveof &lt;masterip&gt; &lt;masterport&gt;
+</code></pre>
+<p>方式二：启动服务器时携带参数</p>
+<pre><code>redis-server --slaveof &lt;masterip&gt; &lt;masterport&gt;
+</code></pre>
+<p>方式三：服务器配置*</p>
+<pre><code>slaveof &lt;masterip&gt; &lt;masterport&gt;
+</code></pre>
+<p>断开连接方式：</p>
+<pre><code>slaveof no one
+</code></pre>
+<hr>
+<h4 id="阶段2数据同步阶段工作流程">阶段2：数据同步阶段工作流程</h4>
+<p>步骤：</p>
+<ol>
+<li>slave发送psync2指令，请求master同步数据</li>
+<li>master创建RDB同步数据</li>
+<li>slave恢复RDB同步数据</li>
+<li>slave向master请求部分同步数据</li>
+<li>slave恢复部分同步数据</li>
+</ol>
+<p>状态：</p>
+<ul>
+<li>slave：具有master端全部数据，包括RDB过程接收的数据</li>
+<li>master：保存slave当前数据同步的位置</li>
+</ul>
+<p>总体：之间完成了数据克隆</p>
+<figure data-type="image" tabindex="3"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306211502117.png" alt="" loading="lazy"></figure>
+<blockquote>
+<p>说明</p>
+</blockquote>
+<p>master：</p>
+<ol>
+<li>如果master数据量巨大，数据同步阶段应避开流量高峰期，避免造成master阻塞，影响业务正常执行</li>
+<li>复制缓冲区大小设定不合理，会造成数据溢出。如进行全量复制周期太长，进行部分复制时发现数据已经存在丢失的情况，必须进行第二次全量复制，致使slave陷入死循环状态。</li>
+</ol>
+<pre><code>repl-backlog-size 1mb
+</code></pre>
+<ol start="3">
+<li>master单机内存占用主机内存的比例不应过大，建议使用50%-70%的内存，留下30%-50%的内存用于执行bgsave命令和创建复制缓冲区</li>
+</ol>
+<p>slave：</p>
+<ol>
+<li>为避免slave进行全量复制、部分复制时服务器响应阻塞或数据不同步，建议关闭此期间的对外服务</li>
+</ol>
+<pre><code>slave-serve-stale-data yes|no
+</code></pre>
+<ol start="2">
+<li>数据同步阶段，master发送给slave信息可以理解为master是slave的一个客户端，主动向slave发送命令</li>
+<li>多个slave同时对master请求数据同步，master发送的RDB文件增多，会对带宽造成巨大冲击，如果master带宽不足，因此数据同步需要根据业务需求，适量错峰</li>
+<li>slave过多时，建议调整拓扑结构，由一主多从结构变为树状结构，中间节点即是master，也是slave。注意使用树状结构时，由于层级深度，导致深度越高的slave与最顶层master间数据同步延迟较大，数据一致性变差，应谨慎选择</li>
+</ol>
+<h5 id="部分复制的三个核心要素">部分复制的三个核心要素</h5>
+<blockquote>
+<p>服务器的运行id</p>
+</blockquote>
+<p>概念：服务器的运行ID是每一台服务器每次运行的身份识别码，一台服务器多次运行可以生成多个运行id</p>
+<p>组成：运行id由40位字符组成，是一个随机的十六进制字符</p>
+<p>作用：运行id被用于在服务器间进行传输，识别身份</p>
+<p>实现方式：运行id在每台服务器启动时自动生成，master在首次连接slave时，会将自己的运行id发送给slave，slave保存此id，通过info Server命令，可以查看节点的runid</p>
+<blockquote>
+<p>复制缓冲区</p>
+</blockquote>
+<p>概念：复制缓冲区，又名复制积压区，是一个先进先出的队列，用于存储服务器执行的命令，每次传播命令，master都会将传播的命令记录下来，并存储在复制缓冲区中（默认大小1M）</p>
+<p>组成：偏移量、字节值</p>
+<p>作用：用于保存master收到的所有指令（仅影响数据变更的指令）</p>
+<p>数据来源：当master接收到主客户端的指令时，除了将指令执行，会将该指令存储到缓冲区中</p>
+<blockquote>
+<p>复制偏移量</p>
+</blockquote>
+<p>概念：一个数字，描述复制缓冲区中的指令字节位置</p>
+<p>分类：</p>
+<ul>
+<li>master复制偏移量：记录发送给所有slave的指令字节对应的位置（多个）</li>
+<li>slave复制偏移量：记录slave接收master发送过来的指令字节的位置（一个）</li>
+</ul>
+<p>数据来源：</p>
+<ul>
+<li>master：发送一次记录一次</li>
+<li>slave端：接收一次记录一次</li>
+</ul>
+<p>作用：信息同步，对比master与slave的差异，当slave断线后，恢复数据使用</p>
+<h5 id="心跳机制">心跳机制</h5>
+<ul>
+<li>进入命令传播阶段，master与slave之间需要进行信息交换，采用心跳机制实现双方连接保持在线</li>
+<li>master心跳：
+<ul>
+<li>指令：PING</li>
+<li>周期：由repl-ping-slave-period决定，默认为10秒</li>
+<li>作用：判断slave是否在线</li>
+<li>查询：INFO replication    //获取slave最后一次连接的时间间隔，lag项维持在0或1视为正常</li>
+</ul>
+</li>
+<li>slave心跳：
+<ul>
+<li>指令：REPLCONF ACK {offset}</li>
+<li>周期：1秒</li>
+<li>作用：
+<ul>
+<li>向master汇报自己所复制的偏移量，判断是否一致，不一致则获取新的数据变更指令</li>
+<li>判断master是否在线</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>心跳阶段注意事项</p>
+</blockquote>
+<ul>
+<li>当slave多数掉线，或延迟过高时，master为保障数据稳定性，将拒绝所有信息同步操作</li>
+</ul>
+<pre><code>min-slaves-to-write 2
+min-slaves-max-lag 10
+注：slave数量小于2或是所有slave的延迟都大于10秒时，强制关闭slave的写功能，停止数据同步
+</code></pre>
+<ul>
+<li>slave数量和延迟由slave发送<strong>REPLCONF ACK</strong>命令确认</li>
+</ul>
+<hr>
+<h4 id="阶段3数据同步与命令传播阶段的工作流程">阶段3：数据同步与命令传播阶段的工作流程</h4>
+<figure data-type="image" tabindex="4"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306144921188.png" alt="image-20200306144921188" loading="lazy"></figure>
+<hr>
+<h4 id="授权访问">授权访问</h4>
+<p>master：</p>
+<pre><code>配置文件中：
+require &lt;password&gt;
+执行时：
+config set requirepass &lt;password&gt;
+config get requirepass
+</code></pre>
+<p>slave:</p>
+<pre><code>配置文件中：
+masterauth &lt;password&gt;
+启动时：
+redis-cli -a &lt;password&gt;
+执行时：
+auth &lt;password&gt;
+</code></pre>
+<hr>
+<h3 id="主从复制常见问题">主从复制常见问题</h3>
+<h4 id="频繁的全量复制">频繁的全量复制</h4>
+<blockquote>
+<p>频繁的全量复制1</p>
+</blockquote>
+<ul>
+<li>
+<p>条件：伴随着系统运行，master的数据量会越来越大，一旦master重启，runid将发生变化，会引起slave的全量复制操作</p>
+<p>内部优化调整方案：</p>
+<ol>
+<li>
+<p>master内部创建master_replid变量，使用runid相同的策略生成，长度41位，并发送给所有slave</p>
+</li>
+<li>
+<p>在master关闭时执行 shutdown save，进行RDB持久化，将runid与offset保存到RDB文件中</p>
+<ul>
+<li>
+<p>repl-id	repl-offset</p>
+</li>
+<li>
+<p>通过redis-check-rdb命令可以查看该信息</p>
+</li>
+</ul>
+</li>
+<li>
+<p>master重启后加载RDB文件，恢复数据</p>
+<p>重启后，将RDB文件保存到repl-id与repl-offset加载到内存中</p>
+<ul>
+<li>master_repl_id = repl	master_repl_offset = repl-offset</li>
+<li>通过info命令可以查看该信息</li>
+</ul>
+</li>
+</ol>
+<p>作用：本机保存上次runid，重启后恢复该值，使所有slave认为还是之前的master</p>
+</li>
+</ul>
+<blockquote>
+<p>频繁的全量复制2</p>
+</blockquote>
+<ul>
+<li>条件：网络环境不佳，出现网络中断，slave不提供服务</li>
+<li>出现原因：复制缓冲区过小，断网后slave的offset越界，触发全量复制</li>
+</ul>
+<p>解决方案：</p>
+<ul>
+<li>修改复制缓冲区大侠</li>
+</ul>
+<pre><code>repl-backlog-size
+</code></pre>
+<p>建议设置如下：</p>
+<ol>
+<li>测算冲master到slave的重连平均时长second</li>
+<li>获取maser平均每秒产生写命令数据总量write_size_per_second</li>
+<li>最优复制缓冲区空间 = 2 * second * write_size_per_second</li>
+</ol>
+<h4 id="频繁的网络中断">频繁的网络中断</h4>
+<blockquote>
+<p>频繁的网络中断1</p>
+</blockquote>
+<ul>
+<li>条件：master的CPU占用过高或slave频繁断开连接</li>
+<li>出现原因：
+<ul>
+<li>slave每1秒发送REPLCONF ACK命令到master</li>
+<li>当slave接收到了慢查询（key *，hgetall等）时，会占用大量CPU性能</li>
+<li>master每1秒调用复制定时函数replicationCron()时，比对slave发现长时间未响应</li>
+</ul>
+</li>
+</ul>
+<p>解决方案：</p>
+<ul>
+<li>设置合理的超时时间，确认是否释放slave</li>
+</ul>
+<pre><code>repl-timeout	//该参数定义了超时时间的阈值（默认60秒），超过该值，释放slave
+</code></pre>
+<blockquote>
+<p>频繁的网络中断2</p>
+</blockquote>
+<ul>
+<li>条件：slave与master断开</li>
+<li>出现原因：
+<ul>
+<li>master发送ping指令的频度较低</li>
+<li>master设定超时时间较短</li>
+<li>ping指令在网络中存在丢包</li>
+</ul>
+</li>
+</ul>
+<p>解决方案：</p>
+<ul>
+<li>提高ping指令的发送频度</li>
+</ul>
+<p>**注意：**超时时间repl-timeout的时间至少是ping指令频度的5-10倍，否则slave很容易判定超时</p>
+<h4 id="数据不一致">数据不一致</h4>
+<ul>
+<li>条件：多个slave获取相同数据不同步</li>
+<li>出现原因：网络信息不同步，数据发送有延迟</li>
+</ul>
+<p>解决方案：</p>
+<ul>
+<li>优化主从间的网络环境，通常放置在同一个机房部署，如果使用云服务器要注意此现象</li>
+<li>监控主从节点延迟（通过offset）判断，如果slave延迟过大，暂时屏蔽程序对该slave的数据访问</li>
+</ul>
+<pre><code>slave-serve-stale-data yes|no	
+//开启后仅响应info、slaveof等少数命令（慎用，除非对数据一致性要求很高）
+</code></pre>
+<hr>
+<h2 id="哨兵模式">哨兵模式</h2>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>哨兵（sentinel）是一个分布式系统，用于对主从结构中的每台服务器进行监控，当出现故障时通过投票机制选择新的master并将所有slave连接到新的master。</p>
+<blockquote>
+<p>作用</p>
+</blockquote>
+<ul>
+<li>
+<p>监控</p>
+<p>不断的检查master和slave是否正常运行</p>
+<p>master存活检测、master与slave运行情况检测</p>
+</li>
+<li>
+<p>通知（提醒）</p>
+<p>当被监控的服务器出现问题时，向其他（哨兵间、客户端）发送通知</p>
+</li>
+<li>
+<p>自动故障转移</p>
+<p>断开master与slave连接，选取一个slave作为master，将其他slave连接到新的master，并告知客户端新的master的地址</p>
+</li>
+</ul>
+<p>**注意：**哨兵也是一台redis服务器，只是不提供数据服务，并且通常哨兵配置数量为单数</p>
+<h3 id="配置哨兵">配置哨兵</h3>
+<p>通过配置文件配置，配置后使用命令启动</p>
+<ul>
+<li>配置文件</li>
+</ul>
+<pre><code class="language-linux">[root@localhost redis-4.0.6]# cat sentinel.conf | grep -v &quot;#&quot; | grep -v &quot;^$&quot;
+port 26379
+dir /tmp
+sentinel monitor mymaster 127.0.0.1 6379 2
+sentinel down-after-milliseconds mymaster 30000
+sentinel parallel-syncs mymaster 1
+sentinel failover-timeout mymaster 180000
+----------------------------------------------------------------------------
+以上分别为：
+端口号
+路径
+监控的master 地址 端口号 哨兵认定数量
+连接未响应时长
+重设master后同时同步数量
+认定下线时间（毫秒）
+</code></pre>
+<ul>
+<li>启动命令</li>
+</ul>
+<pre><code class="language-redis">redis-sentinel sentinel-端口号.conf
+</code></pre>
+<ul>
+<li>连接命令</li>
+</ul>
+<pre><code>redis-cli -p 端口号
+</code></pre>
+<p>**注意：**在服务启动后哨兵的配置文件会发生改变</p>
+<h3 id="工作原理">工作原理</h3>
+<blockquote>
+<p>阶段一：监控阶段</p>
+</blockquote>
+<ul>
+<li>
+<p>用于同步各个节点的状态信息</p>
+<ul>
+<li>获取各个sentinel的状态（是否在线）</li>
+<li>获取master的状态
+<ul>
+<li>master属性
+<ul>
+<li>runid</li>
+<li>role：master</li>
+</ul>
+</li>
+<li>各个slave的详细信息</li>
+</ul>
+</li>
+<li>获取所有slave的状态（根据master中的slave信息）
+<ul>
+<li>slave属性
+<ul>
+<li>runid</li>
+<li>role：slave</li>
+<li>master_host、master_port</li>
+<li>offset</li>
+<li>......</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>工作内容：</p>
+<ol>
+<li>第一个sentinel与master进行连接后，发送info指令</li>
+<li>建立长期cmd连接，sentinal同时保存所有哨兵状态，master中记录redis实例信息</li>
+<li>通过master中的slave信息与其中的slave进行连接并发送info指令</li>
+<li>第二个sentinel进入，与master连接发送info指令，发现master端的sentinels中有信息</li>
+<li>与第一个sentinel建立连接并同步信息，互相发送ping命令保证对方在线，并于master建立cmd连接</li>
+</ol>
+</li>
+</ul>
+<figure data-type="image" tabindex="5"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306182151521.png" alt="" loading="lazy"></figure>
+<blockquote>
+<p>通知阶段</p>
+</blockquote>
+<ul>
+<li>工作内容：由其中一个sentinel通过建立的cmd连接获取主从机的工作状态，获取到信息并且与相互连接的其他sentinel之间进行信息同步。</li>
+</ul>
+<figure data-type="image" tabindex="6"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306181804282.png" alt="image-20200306181804282" loading="lazy"></figure>
+<blockquote>
+<p>故障转移阶段</p>
+</blockquote>
+<ul>
+<li>故障转移阶段引起原因：</li>
+</ul>
+<ol>
+<li>其中一台sentinel多次获取master状态失败</li>
+<li>将master中标记为SRI_S_DOWN（主观下线）</li>
+<li>在sentinel之间传播，表示发现master掉线</li>
+<li>其他sentinel连接master</li>
+<li>连接失败的sentinel在sentinel之间表示发现master掉线</li>
+<li>连接失败的sentinel占sentinel总数超过一半时，将master标记为SRI_O_DOWN（客观下线），确定master掉线</li>
+</ol>
+<figure data-type="image" tabindex="7"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306184201644.png" alt="image-20200306184201644" loading="lazy"></figure>
+<ul>
+<li>选出sentinel担任处置工作：</li>
+</ul>
+<ol>
+<li>所有的sentinel同时对其余的sentinel发送一条指令（SENTINEL is-master-down-by...），其中包含：下线的ip、下线的端口、竞选次数、runid</li>
+<li>通过循环的投票机制，选出一台sentinel担任处置工作
+<ul>
+<li>投票机制：每个sentinel均是投票者也是参选者，例如：当前有五台sentinel，其中4台sentinel会同时向剩余的一台sentinel发送自己的信息，剩余这台的sentinel会将自己的票投给信息最先到达的sentinel，最后通过所有投票情况选出获得票数最多的sentinel。</li>
+</ul>
+</li>
+</ol>
+<figure data-type="image" tabindex="8"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306202853958.png" alt="image-20200306202853958" loading="lazy"></figure>
+<ul>
+<li>
+<p>通过投票机制产生的sentinel从服务器列表中选择出备选的master</p>
+<ul>
+<li>担任master的选择方式：
+<ol>
+<li>在线的</li>
+<li>响应速度快的</li>
+<li>与原master断开时间短的</li>
+<li>优先原则：
+<ol>
+<li>优先级</li>
+<li>offset</li>
+<li>runid</li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p>发送指令</p>
+<ol>
+<li>向新的master发送slaveof no one，表示与master断开连接</li>
+<li>向其他slave发送slaveof 新master的IP 端口，使其他slave与新master产生主从关系</li>
+</ol>
+</li>
+</ul>
+</p>
+
+     <p class="md_block">
+    <div class="reward"><div class="reward-button">赏 <span class="reward-code"> <span class="alipay-code"> <img class="alipay-img" src="https://liuyuzheng8.github.io/media/images/alipay.png"><b>支付宝扫码打赏</b> </span> <span class="wechat-code"> <img class="wechat-img" src="https://liuyuzheng8.github.io/media/images/wechat.png"><b>微信打赏</b> </span> </span></div></div>
+</p> 
+</div>
+
+</div>
+
+
+
+<link href="https://liuyuzheng8.github.io/styles/main.css" type="text/css" rel="stylesheet"/>
+
+<div class="doc_comments">
+
+</div>
+
+
+
+  </div>
+</div>
+
+
+
+      </div>
+
+
+
+
+    </div>
+
+   <div class="footer">
+<link href="https://liuyuzheng8.github.io/styles/main.css" type="text/css" rel="stylesheet"/><div class="site_footer_wrap"><div class="site_footer">
+
+      <div class="mysocials"><div class="my_socials">
+		   
+			   
+    
+			   
+    
+			   
+    
+			   
+    
+</div><link href="https://liuyuzheng8.github.io/styles/main.css" type="text/css" rel="stylesheet"/>
+
+      </div>
+
+      <div class="copyright">Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+      </div>
+
+</div></div>
+
+    </div>
+
+
+<style type="text/css">a.back_to_top {
+    text-decoration: none;
+    position: fixed;
+    bottom: 40px;
+    right: 30px;
+    background: #f0f0f0;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    line-height: 36px;
+    font-size: 18px;
+    text-align: center;
+    transition-duration: .5s;
+    transition-propety: background-color;
+    display: none;
+}
+
+a.back_to_top span {
+    color: #888;
+}
+
+a.back_to_top:hover {
+    cursor: pointer;
+    background: #dfdfdf;
+}
+
+a.back_to_top:hover span {
+    color: #555;
+}
+
+@media print, screen and (max-width: 580px) {
+    .back_to_top {
+        display: none !important;
+    }
+}
+
+
+
+</style><a id="back_to_top" href="#" class="back_to_top"><span>△</span>
+</a>
+<script type="text/javascript" src="https://liuyuzheng8.github.io/media/scripts/jquery.js"></script>
+
+<script>$(document).ready((function(_this) {
+  return function() {
+    var bt;
+    bt = $('#back_to_top');
+    if ($(document).width() > 480) {
+      $(window).scroll(function() {
+        var st;
+        st = $(window).scrollTop();
+        if (st > 30) {
+          return bt.css('display', 'block');
+        } else {
+          return bt.css('display', 'none');
+        }
+      });
+      return bt.click(function() {
+        $('body,html').animate({
+          scrollTop: 0
+        }, 800);
+        return false;
+      });
+    }
+  };
+})(this));
+</script>
+
+</body>
+
+</html>

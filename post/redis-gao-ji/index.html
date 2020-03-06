@@ -1,0 +1,780 @@
+
+<html>
+  <head lang="zh">
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"/>
+        <meta content="yes" name="apple-mobile-web-app-capable"/>
+        <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+        <meta content="telephone=no" name="format-detection"/>
+        <meta name="renderer" content="webkit">
+    <title>Redis高级 | Iktsuarpok</title>
+<link href="https://liuyuzheng8.github.io/styles/main.css" type="text/css" rel="stylesheet"/>
+<script type="text/javascript" src="https://liuyuzheng8.github.io/media/scripts/jquery.js"></script>
+<script type="text/javascript" src="https://liuyuzheng8.github.io/media/scripts/basic.js"></script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  </head>
+
+  <body>
+     <div class="header">
+      <div class="logo_title">
+		  
+        <div class="title animated fadeInDown"><img src="https://liuyuzheng8.github.io/images/avatar.png?v=1583500720529"/>
+
+          <h1 title="Iktsuarpok" class="weaklink"><a href="/">Iktsuarpok</a>
+
+          </h1>
+
+          <div class="navbar weaklink">
+            <div class="normal_nav">
+
+<div class="bitcron_nav_container">
+
+
+  <div class="bitcron_nav">
+    <div class="mixed_site_nav_wrap site_nav_wrap">
+		
+      <ul class="mixed_site_nav site_nav sm sm-base">
+ 
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io" class="selected active current nav__item" >首页</a>
+
+  </li>
+ 
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io/tags" class="selected active current nav__item" >标签</a>
+
+  </li>
+ 
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io/archives" class="selected active current nav__item" >归档</a>
+
+  </li>
+ 
+
+      </ul>
+
+      <div class="clear clear_nav_inline_end"></div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="clear clear_nav_end"></div>
+
+</div>
+
+            </div>
+
+            <div class="hamberger"><i class="fa fa-bars"></i>
+<i class="fa fa-times"></i>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="hidden_nav animated fadeInDown">
+
+<div class="bitcron_nav_container">
+
+
+  <div class="bitcron_nav">
+    <div class="mixed_site_nav_wrap site_nav_wrap">
+      <ul class="mixed_site_nav site_nav sm sm-base">
+		  
+	
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io" class="selected active current nav__item" >首页</a>
+
+  </li>
+
+
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io/tags" class="selected active current nav__item" >标签</a>
+
+  </li>
+
+
+  <li><a id="d2ef19af68cc211e98f8a0242ac110003" href="https://liuyuzheng8.github.io/archives" class="selected active current nav__item" >归档</a>
+
+  </li>
+
+
+
+
+
+      </ul>
+
+      <div class="clear clear_nav_inline_end"></div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="clear clear_nav_end"></div>
+
+</div>
+
+      </div>
+
+    </div>
+
+
+    <div class="main">
+      <div class="main-inner">
+
+
+<div class="content">
+
+
+
+
+
+
+  <div class="post_page" >
+
+<div class="post">
+  <div class="post_title sm_margin">
+    <h2><a>Redis高级</a>
+
+
+
+    </h2>
+  </div>
+
+  <div class="post_details">
+    <div class="info"><i class="fa fa-clock-o"></i>
+<span class="date_info">2020-03-06</span>
+<i class="fa fa-eye"></i>
+
+<span class="date_info"><span id="busuanzi_value_page_pv"></span> Views</span>
+
+
+<i class="fa fa-bookmark-o"></i>
+<span class="tags_info weaklink">
+	
+	<a href="https://liuyuzheng8.github.io/tag/i5L1NzG9C/" class="tag">数据库</a>
+
+	<a href="https://liuyuzheng8.github.io/tag/Pwkspp1Yt/" class="tag">Redis</a>
+
+
+</span>
+
+
+    </div>
+
+  </div>
+
+
+
+
+
+  <div class="post_content markdown"><p class="md_block">
+    <span class="md_line md_line_start md_line_end"><h1 id="redis高级">Redis高级</h1>
+<h2 id="linux环境下的redis">Linux环境下的Redis</h2>
+<h3 id="在linux环境中安装redis">在Linux环境中安装redis</h3>
+<blockquote>
+<p>下载安装包</p>
+</blockquote>
+<pre><code># wget http://download.redis.io/releases/redis-?.?.?.tar.gz
+</code></pre>
+<blockquote>
+<p>解压</p>
+</blockquote>
+<pre><code>tar -xvf 文件名.tar.gz
+</code></pre>
+<blockquote>
+<p>编译</p>
+</blockquote>
+<pre><code>make
+</code></pre>
+<blockquote>
+<p>安装</p>
+</blockquote>
+<pre><code>make install
+</code></pre>
+<hr>
+<h3 id="启动redis服务">启动Redis服务</h3>
+<blockquote>
+<p>直接启动</p>
+</blockquote>
+<ul>
+<li>进入redis下的src目录，打开redis-server</li>
+</ul>
+<pre><code># redis-server [port]
+</code></pre>
+<ul>
+<li>打开redis-cli</li>
+</ul>
+<pre><code># redis-cli [-h host] [-p port]
+</code></pre>
+<blockquote>
+<p>指定配置文件启动*</p>
+</blockquote>
+<ul>
+<li>
+<p>编写指定配置文件 xxx.conf</p>
+</li>
+<li>
+<p>打开服务时指定</p>
+</li>
+</ul>
+<pre><code># redis-server [配置文件]
+</code></pre>
+<hr>
+<h2 id="持久化">持久化</h2>
+<blockquote>
+<p>什么是持久化</p>
+</blockquote>
+<p>利用永久性存储介质将数据进行保存，在特定的时间将保存的数据进行恢复的工作机制称为永久化。</p>
+<blockquote>
+<p>持久化的方式</p>
+</blockquote>
+<ul>
+<li>将当前数据状态进行保存，快照形式，存储数据结果，存储格式简单，关注点在数据（RDB）</li>
+<li>将数据的操作过程进行保存，日志形式，存储操作过程，存储格式复杂，关注点在数据的操作过程（AOF）</li>
+</ul>
+<h3 id="rdb方式">RDB方式</h3>
+<blockquote>
+<p>命令</p>
+</blockquote>
+<pre><code>save	//作用：手动执行一次保存操作
+bgsave	//作用：手动启动后台保存操作，但不是立即执行
+save second changes		//作用：在一定时间内key的数量变化达到指定值时自动执行持久							化，后台是bgsave
+特殊形式：
+debug reload	//服务器运行过程中保存
+shutdown save	//关闭服务器时指定保存数据
+</code></pre>
+<p>**注意：**save指令的执行会阻塞当前Redis服务器，直到当前RDB过程完成为止，有可能会长时间阻塞，线上环境不建议使用；而bgsave是针对save阻塞问题做的优化，通过调用linux中的fork函数生成子进程保存，Redis中所有涉及到RDB操作都采用bgsave的方式，save命令可以放弃使用。</p>
+<blockquote>
+<p>save指令的相关配置</p>
+</blockquote>
+<ul>
+<li>
+<p>dbfilename dump.rdb</p>
+<p>说明：设置本地数据库文件名，默认值为dump.rdb</p>
+<p>经验：通常设置为dump-端口号.rdb</p>
+</li>
+<li>
+<p>dir</p>
+<p>说明：设置存储.rdb文件的路径</p>
+<p>经验：通常设置成存储空间较大的目录中，目录名称data</p>
+</li>
+<li>
+<p>rdbcompression yes</p>
+<p>说明：设置存储至本地数据库时是否压缩数据，默认为yes，采用LZF压缩</p>
+<p>经验：通常默认为开启状态，如果设置为no，可以节省CPU运行时间，但会使存储的文件变大（巨大）</p>
+</li>
+<li>
+<p>rdbchecksum yes</p>
+<p>说明：设置是否进行RDB文件格式校验，该校验过程在写文件和读文件过程均进行</p>
+<p>经验：通常默认为开启状态，如果设置为no，可以节约读写性能过程约10%时间消耗，但是存在一定的数据损坏风险</p>
+</li>
+<li>
+<p>stop-writes-on-bgsave-error yes</p>
+<p>说明：后台存储过程中如果出现错误现象，是否停止保存操作（bgsave的配置）</p>
+<p>经验：通常默认为开启状态</p>
+</li>
+</ul>
+<blockquote>
+<p>对比</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">方式</th>
+<th style="text-align:center">save指令</th>
+<th style="text-align:center">bgsave指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">读写</td>
+<td style="text-align:center">同步</td>
+<td style="text-align:center">异步</td>
+</tr>
+<tr>
+<td style="text-align:center">阻塞客户端指令</td>
+<td style="text-align:center">是</td>
+<td style="text-align:center">否</td>
+</tr>
+<tr>
+<td style="text-align:center">额外内存消耗</td>
+<td style="text-align:center">否</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td style="text-align:center">启动新进程</td>
+<td style="text-align:center">否</td>
+<td style="text-align:center">是</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>RDB的优缺点</p>
+</blockquote>
+<p>优点：</p>
+<ul>
+<li>RDB时一个紧凑压缩的二进制文件，存储效率较高</li>
+<li>RDB内部存储的时redis在某个时间点的数据快照，非常适合用于数据备份，全量复制等场景</li>
+<li>RDB恢复数据的速度要比AOF快很多</li>
+<li>应用：服务器中没X消失执行bgsave备份，并将RDB文件拷贝到远程机器中，用于灾难恢复</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>RDB方式无论是执行指令还是利用配置，无法做到实时持久化，具有较大可能性丢失数据</li>
+<li>bgsave指令每次运行要执行fork操作创建子进程，要牺牲掉一些性能</li>
+<li>Redis的众多版本中未进行RDB文件格式的版本同一，有可能出现各版本之间数据格式无法兼容现象</li>
+</ul>
+<hr>
+<h3 id="aof方式">AOF方式</h3>
+<blockquote>
+<p>概念</p>
+</blockquote>
+<ul>
+<li>AOF(append only file)持久化：以独立日志的方式记录每次写命令，重启时重新执行AOF文件中的命令已达到恢复数据的目的。与RDB相比可以简单描述为将记录数据转变为记录数据产生的过程。</li>
+<li>AOF的主要作用是解决了数据持久化的实时性，目前已经是Redis持久化的主流方案。</li>
+</ul>
+<blockquote>
+<p>AOF写数据的三种策略</p>
+</blockquote>
+<ul>
+<li>
+<p>always（每次）</p>
+<p>每次写入操作均同步到AOF文件中，数据零误差，性能较低</p>
+</li>
+<li>
+<p>everysec（每秒）</p>
+<p>每秒将缓冲区中的指令同步到AOF文件中，数据准确性较高，性能较高</p>
+<p>在系统突然宕机的情况下丢失1秒内的数据</p>
+</li>
+<li>
+<p>no（系统控制）</p>
+<p>由操作系统控制每次同步到AOF文件的周期，整体过程不可控</p>
+</li>
+</ul>
+<blockquote>
+<p>AOF功能开启</p>
+</blockquote>
+<ul>
+<li>配置</li>
+</ul>
+<pre><code class="language-linux">appendonly yes|no		//是否开启AOF持久化功能，默认为不开启状态
+appendfsync always|everysec|no		//AOF写数据策略
+appendfilename filename		//AOF持久化文件名，默认文件名为appendonly.aof,建议								  配置为appendonly-端口号.aof
+</code></pre>
+<hr>
+<h4 id="aof重写">AOF重写</h4>
+<blockquote>
+<p>作用</p>
+</blockquote>
+<ul>
+<li>降低磁盘占用量，提高磁盘利用率</li>
+<li>提高持久化效率，降低持久化写时间，提高IO性能</li>
+<li>降低数据恢复用时，提高数据恢复效率</li>
+</ul>
+<blockquote>
+<p>AOF重写方式</p>
+</blockquote>
+<ul>
+<li>手动重写</li>
+</ul>
+<pre><code class="language-linux">bgrewriteaof
+</code></pre>
+<ul>
+<li>自动重写</li>
+</ul>
+<pre><code>auto-aof-rewrite-min-size size
+auto-aof-rewrite-percentage percentage
+</code></pre>
+<hr>
+<h3 id="rdb与aof对比">RDB与AOF对比</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">持久化方式</th>
+<th style="text-align:center">RDB</th>
+<th style="text-align:center">AOF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">占用存储空间</td>
+<td style="text-align:center">小（数据级：压缩）</td>
+<td style="text-align:center">大（指令级：重写）</td>
+</tr>
+<tr>
+<td style="text-align:center">存储速度</td>
+<td style="text-align:center">慢</td>
+<td style="text-align:center">快</td>
+</tr>
+<tr>
+<td style="text-align:center">恢复速度</td>
+<td style="text-align:center">快</td>
+<td style="text-align:center">慢</td>
+</tr>
+<tr>
+<td style="text-align:center">数据安全性</td>
+<td style="text-align:center">会丢失数据</td>
+<td style="text-align:center">依据策略决定</td>
+</tr>
+<tr>
+<td style="text-align:center">资源消耗</td>
+<td style="text-align:center">高/重量级</td>
+<td style="text-align:center">低/轻量级</td>
+</tr>
+<tr>
+<td style="text-align:center">启动优先级</td>
+<td style="text-align:center">低</td>
+<td style="text-align:center">高</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="事务">事务</h2>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>Redis事务就是一个命令执行的队列，将一系列预定义命令包装成一个整体（一个队列）。当执行时，一次性按照添加顺序依次执行，中间不会被打断或者干扰。</p>
+<p>总结：一个队列中，一次性、顺序性、排他性的执行一系列命令。</p>
+<blockquote>
+<p>事务的基本操作</p>
+</blockquote>
+<pre><code>multi		//设置事务的开启位置，此指令执行后，后续的所有指令均加入到事务中
+exec		//设置事务的结束位置，同时执行事务。与multi成对出现，成对使用
+discard		//终止当前事务的定义，发生在multi之后，exec之前
+</code></pre>
+<p>**注意：**已经执行完毕的命令对应的数据不会自动回滚，需要程序员在代码中实现回滚。</p>
+<blockquote>
+<p>锁</p>
+</blockquote>
+<p>事务锁：</p>
+<pre><code>watch key1 [key2...]	//对key添加监视锁，在执行exec前如果key发生了变化，终止事							务执行
+unwatch					//取消对所有key的监视
+</code></pre>
+<p>分布式锁：</p>
+<pre><code>setnx lock-key value	//使用setnx设置一个公共锁
+del lock-key			//删除一个公共锁
+添加时间设定的锁：
+expire lock-key second
+pexpire lock-key milliseconds
+</code></pre>
+<p>​		利用setnx命令的返回值特征，有值返回则设置失败，无值返回则设置成功：</p>
+<p>​				1.对于返回设置成功的，拥有控制权，进行下一步的具体业务操作</p>
+<p>​				2.对于返回设置失败的，不具有控制权，排队或等待</p>
+<hr>
+<h2 id="删除策略">删除策略</h2>
+<h3 id="数据删除策略">数据删除策略</h3>
+<blockquote>
+<p>Redis中数据的特征</p>
+</blockquote>
+<p>Redis是一种内存级数据库，所有数据均存放在内存中，内存中的数据可以通过TTL指令获取其状态</p>
+<ul>
+<li>XX：具有时效性的数据</li>
+<li>-1：永久有效的数据</li>
+<li>-2：已经过期的数据或被删除的数据、未定义的数据</li>
+</ul>
+<blockquote>
+<p>Redis中时效性数据的存储结构</p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%AB%98%E7%BA%A7.assets%5Cimage-20200303190313869.png" alt="image-20200303190338409" loading="lazy"></figure>
+<blockquote>
+<p>目标</p>
+</blockquote>
+<p>在内存占用与CPU占用之间寻找一种平衡，顾此失彼都会造成整体redis性能的下降，甚至引发服务器宕机或内存泄漏</p>
+<hr>
+<h4 id="定时删除">定时删除</h4>
+<ul>
+<li>创建一个定时器，当key设置有过期时间，且过期时间到达时，由定时器任务立即执行对键的删除操作。</li>
+<li>优点：节约内存，到时就删除，快速释放掉不必要的内存占用</li>
+<li>缺点：CPU压力很大，无论CPU此时负载多高，均占用CPU，会影响Redis服务器响应时间和指令吞吐量</li>
+<li>总结：用处理器性能换取存储空间</li>
+</ul>
+<hr>
+<h4 id="惰性删除">惰性删除</h4>
+<ul>
+<li>数据到达过期时间，不做处理，等下次访问该数据时删除</li>
+<li>优点：节约CPU性能，发现必须删除的时候才删除</li>
+<li>缺点：内存压力很大，出现长期占用内存的数据</li>
+<li>总结：用存储空间换取处理器性能</li>
+</ul>
+<hr>
+<h4 id="定期删除">定期删除</h4>
+<pre><code>* Redis启动服务器初始化时，读取配置server.hz的值，默认为10
+* 每秒钟执行server.hz次 serverCron() -&gt; databaseCron() -&gt; activeExpireCycle()
+* activeExpireCycle()对每个expire[*]（每个数据库对应一个expire）逐一进行检测，每	次执行250ms/server.hz
+* 对某个expires[*]检测时，随机挑选W个key检测
+      * 如果key超时，删除key
+      * 如果一轮中删除的kshaney的数量&gt;W*25%，循环该过程
+      * 如果一轮中删除的kshaney的数量≤W*25%，检查下一个expire[\*]，0-15循环
+      * W取值=ACTIVE_EXPIRE_CYCLE_LOOKUPS_PER_LOOP属性值
+* 参数current_db用于记录activeExpireCycle()进入哪个expire[*]执行
+</code></pre>
+<ul>
+<li>周期性轮询redis库中的时效性数据，采用随机抽取的策略，利用过期数据占比的方式控制删除频度</li>
+<li>特点1：CPU性能占用设置有峰值，检测频度可以自定义设置</li>
+<li>特点2：内存压力不是很大，长期占用内存的冷数据会被持续清理</li>
+<li>总结：周期性抽查存储空间</li>
+</ul>
+<p><strong>在Redis中，同时使用 惰性删除 与 定期删除 两种策略。</strong></p>
+<hr>
+<h3 id="数据逐出策略">数据逐出策略</h3>
+<blockquote>
+<p>什么是逐出算法</p>
+</blockquote>
+<p>Redis使用内存存储数据，在执行每一个命令前，会调用freeMemoryIfNeeded()检测内存是否充足。如果内存不满足新加入数据的最低存储要求，redis会临时删除一些数据为当前指令清理内存空间。清理数据的策略称为逐出算法。</p>
+<p>**注意：**逐出数据的过程不是100%能够清理出足够的可使用的内存空间，如果不成功则反复执行。当对所有数据尝试完毕后，如果不能达到内存清理的要求，将出现错误信息。</p>
+<blockquote>
+<p>影像数据逐出的相关配置</p>
+</blockquote>
+<pre><code>maxmemory			//最大可使用内存，为物理占用内存的比例，默认0，生产环境中一般					设置50%以上
+maxmemory-samples	//每次选取待删除数据的个数
+maxmemory-policy	//达到最大内存后的逐出策略
+</code></pre>
+<p>可选的逐出策略：</p>
+<ul>
+<li>检测易失数据（可能会过期的数据集server.db[i].expires）</li>
+</ul>
+<ol>
+<li>volatile-lru：挑选最近使用时间最少的数据</li>
+<li>volatile-lfu：挑选最近使用次数最少的数据</li>
+<li>volatile-ttl：挑选将要过期的数据</li>
+<li>volatile-random：任意选择数据</li>
+</ol>
+<ul>
+<li>检测全库数据（所有数据集server.db[i].dict）</li>
+</ul>
+<ol>
+<li>allkeys-lru：挑选最近使用时间最少的数据</li>
+<li>allkeys-lfu：挑选最近使用次数最少的数据</li>
+<li>allkeys-random：任意选择数据</li>
+</ol>
+<ul>
+<li>放弃数据驱逐</li>
+</ul>
+<ol>
+<li>no-enviction：禁止驱逐，会引发OOM</li>
+</ol>
+<hr>
+<h2 id="服务器配置">服务器配置</h2>
+<blockquote>
+<p>基础配置</p>
+</blockquote>
+<pre><code>daemonize yes|no			//设置服务器以守护进程的方式运行
+bind 127.0.0.1				//绑定主机地址
+port 6379					//设置服务器端口号
+databases 16				//设置数据库数量
+
+</code></pre>
+<blockquote>
+<p>日志配置</p>
+</blockquote>
+<pre><code>loglevel debug|verbose|notice|warning		//设置服务器的日志级别
+logfile	端口号.log							 //日志记录文件名
+
+</code></pre>
+<blockquote>
+<p>客户端配置</p>
+</blockquote>
+<pre><code>maxclients 0				//设置同一时间最大客户端连接数
+timeout						//客户端闲置等待最大时常，达到最大值后关闭连接，关闭								设置为0
+
+</code></pre>
+<blockquote>
+<p>多服务器快捷配置</p>
+</blockquote>
+<pre><code>include /path/server-端口号.conf	//导入并加载指定配置文件信息
+
+</code></pre>
+<hr>
+<h2 id="高级数据类型">高级数据类型</h2>
+<h3 id="bitmaps">Bitmaps</h3>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>Redis提供了Bitmaps这个“数据结构”可以实现对位的操作。 把数据结构加上引号主要因为：</p>
+<ul>
+<li>Bitmaps本身不是一种数据结构，实际上它就是字符串，但是它可以对字符串的位进行操作。</li>
+<li>Bitmaps单独提供了一套命令，所以在Redis中使用Bitmaps和使用字符串的方法不太相同。 可以把Bitmaps想象成一个以位为单位的数组，数组的每个单元只能存储0和1，数组的下标在Bitmaps中叫做偏移量。</li>
+</ul>
+<p>总结：设置对应的bit串，每一位的0/1值作为判定条件。如1010001，每一位对应一个用户是否访问。</p>
+<blockquote>
+<p>操作</p>
+</blockquote>
+<pre><code>getbit key offset				//获取指定key对应偏移量上的bit值
+setbit key offset value			//设置指定key对应偏移量上的bit值，取0或1
+bitcount key [start end]		//计算指定key中1的数量
+bitop op destkey key1 [key2...]	//对指定key进行位运算并将结果保存在destkey中
+	op的取值：and|or|not|xor
+
+</code></pre>
+<hr>
+<h3 id="hyperloglog">HyperLogLog</h3>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>HyperLogLog是用于统计基数的。</p>
+<p>基数：集合去重后的元素个数。如：{1,3,5,7,5,7,8}的基数为{1,3,5,7,8}</p>
+<blockquote>
+<p>操作</p>
+</blockquote>
+<pre><code>pfadd key element [element...]				//添加数据
+pfcount key [key...]						//统计数据
+pfmerge destkey sourcekey [sourcekey...]	//合并数据
+
+</code></pre>
+<p><strong>注意：</strong></p>
+<ul>
+<li>用于进行基数统计，不是集合，不是保存数据，只记录数量而不是记录数据</li>
+<li>核心是基数估算算法，最终数值存在一定误差</li>
+<li>误差范围：基数估计是结果是一个带有0.81%标准错误的近似值</li>
+<li>耗空间极小，每个HyperLogLog key占用了12K的内存用于标记基数</li>
+<li>pfadd命令不是一次性分配12K内存使用，会随着基数的增加内存而增大</li>
+<li>pfmerge命令合并后占用的存储空间为12K，无论合并之前数据量多少</li>
+</ul>
+<hr>
+<h3 id="geo">GEO</h3>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>GEO可以用于存储位置信息。</p>
+<blockquote>
+<p>操作</p>
+</blockquote>
+<pre><code>geoadd key longitude latitude member [longitude latitude member...]			  //添加坐标点
+geopos key member [member...]		//获取坐标点
+geodist key member1 member2 [unit]	//计算坐标点距离
+georadius key longitude latitude radius m|km|ft|mi [withcoord] [withdist] [withhash] [count count]			  //根据坐标求范围内的数据
+georadiusbymember key member radius m|km|ft|mi [withcoord] [withdist] [withhash] [count count]			  //根据点求范围内的数据
+geohash key member [member...]		//获取指定点对应的坐标hash值
+
+</code></pre>
+</p>
+
+     <p class="md_block">
+    <div class="reward"><div class="reward-button">赏 <span class="reward-code"> <span class="alipay-code"> <img class="alipay-img" src="https://liuyuzheng8.github.io/media/images/alipay.png"><b>支付宝扫码打赏</b> </span> <span class="wechat-code"> <img class="wechat-img" src="https://liuyuzheng8.github.io/media/images/wechat.png"><b>微信打赏</b> </span> </span></div></div>
+</p> 
+</div>
+
+</div>
+
+
+
+<link href="https://liuyuzheng8.github.io/styles/main.css" type="text/css" rel="stylesheet"/>
+
+<div class="doc_comments">
+
+</div>
+
+
+
+  </div>
+</div>
+
+
+
+      </div>
+
+
+
+
+    </div>
+
+   <div class="footer">
+<link href="https://liuyuzheng8.github.io/styles/main.css" type="text/css" rel="stylesheet"/><div class="site_footer_wrap"><div class="site_footer">
+
+      <div class="mysocials"><div class="my_socials">
+		   
+			   
+    
+			   
+    
+			   
+    
+			   
+    
+</div><link href="https://liuyuzheng8.github.io/styles/main.css" type="text/css" rel="stylesheet"/>
+
+      </div>
+
+      <div class="copyright">Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+      </div>
+
+</div></div>
+
+    </div>
+
+
+<style type="text/css">a.back_to_top {
+    text-decoration: none;
+    position: fixed;
+    bottom: 40px;
+    right: 30px;
+    background: #f0f0f0;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    line-height: 36px;
+    font-size: 18px;
+    text-align: center;
+    transition-duration: .5s;
+    transition-propety: background-color;
+    display: none;
+}
+
+a.back_to_top span {
+    color: #888;
+}
+
+a.back_to_top:hover {
+    cursor: pointer;
+    background: #dfdfdf;
+}
+
+a.back_to_top:hover span {
+    color: #555;
+}
+
+@media print, screen and (max-width: 580px) {
+    .back_to_top {
+        display: none !important;
+    }
+}
+
+
+
+</style><a id="back_to_top" href="#" class="back_to_top"><span>△</span>
+</a>
+<script type="text/javascript" src="https://liuyuzheng8.github.io/media/scripts/jquery.js"></script>
+
+<script>$(document).ready((function(_this) {
+  return function() {
+    var bt;
+    bt = $('#back_to_top');
+    if ($(document).width() > 480) {
+      $(window).scroll(function() {
+        var st;
+        st = $(window).scrollTop();
+        if (st > 30) {
+          return bt.css('display', 'block');
+        } else {
+          return bt.css('display', 'none');
+        }
+      });
+      return bt.click(function() {
+        $('body,html').animate({
+          scrollTop: 0
+        }, 800);
+        return false;
+      });
+    }
+  };
+})(this));
+</script>
+
+</body>
+
+</html>

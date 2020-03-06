@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://liuyuzheng8.github.io</id>
     <title>Iktsuarpok</title>
-    <updated>2020-03-05T13:09:32.106Z</updated>
+    <updated>2020-03-06T13:18:50.198Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://liuyuzheng8.github.io"/>
     <link rel="self" href="https://liuyuzheng8.github.io/atom.xml"/>
@@ -11,616 +11,499 @@
     <icon>https://liuyuzheng8.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Iktsuarpok</rights>
     <entry>
-        <title type="html"><![CDATA[Redis]]></title>
-        <id>https://liuyuzheng8.github.io/post/redis/</id>
-        <link href="https://liuyuzheng8.github.io/post/redis/">
+        <title type="html"><![CDATA[Redis集群]]></title>
+        <id>https://liuyuzheng8.github.io/post/redis-ji-qun/</id>
+        <link href="https://liuyuzheng8.github.io/post/redis-ji-qun/">
         </link>
-        <updated>2020-03-05T12:36:59.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="redis">Redis</h1>
-<h2 id="redis基础">Redis基础</h2>
-<h3 id="redis简介">Redis简介</h3>
-<h4 id="nosql">NoSQL</h4>
-<p>NoSQL：即Not-OnlySQL（泛指非关系型的数据库），作为关系型数据库的补充。</p>
-<p>作用：应对基于海量用户和海量数据前提下的数据处理问题。</p>
-<p>特征：</p>
-<ul>
-<li>可扩容，可伸缩</li>
-<li>大数据量下高性能</li>
-<li>灵活的数据模型</li>
-<li>高可用</li>
-</ul>
-<hr>
-<h4 id="redis概念">Redis概念</h4>
-<p><strong>Redis</strong>是用C语言开发的一个开源的高性能键值对（key-value）数据库。</p>
-<p>特征：</p>
+        <updated>2020-03-06T13:18:19.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="redis集群">Redis集群</h1>
+<h2 id="主从复制">主从复制</h2>
+<p><a href="https://www.cnblogs.com/wade-luffy/p/9639986.html">相关文档</a></p>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>主从复制，是指将一台Redis服务器的数据，复制到其他的Redis服务器。前者称为主节点(master/leader)，后者称为从节点(slave/follower)；数据的复制是单向的，只能由主节点到从节点。</p>
+<p>主从复制的作用主要包括：</p>
 <ol>
-<li>数据间没有必然的关联关系</li>
-<li>内部采用<strong>单线程</strong>机制进行工作</li>
-<li>高性能</li>
-<li>多数据类型支持</li>
-<li>持久化支持</li>
+<li>数据冗余：主从复制实现了数据的热备份，是持久化之外的一种数据冗余方式。</li>
+<li>故障恢复：当主节点出现问题时，可以由从节点提供服务，实现快速的故障恢复；实际上是一种服务的冗余。</li>
+<li>负载均衡：在主从复制的基础上，配合读写分离，可以由主节点提供写服务，由从节点提供读服务（即写Redis数据时应用连接主节点，读Redis数据时应用连接从节点），分担服务器负载；尤其是在写少读多的场景下，通过多个从节点分担读负载，可以大大提高Redis服务器的并发量。</li>
+<li>高可用基石：除了上述作用以外，主从复制还是哨兵和集群能够实施的基础，因此说主从复制是Redis高可用的基础。</li>
 </ol>
 <hr>
-<h3 id="redis数据">Redis数据</h3>
-<h4 id="redis数据存储格式">Redis数据存储格式</h4>
-<p>Redis自身的是一个Map，所有的数据以键值对的方式存储。</p>
+<h3 id="工作流程">工作流程</h3>
+<p>主从复制过程大体可以分为三个阶段：</p>
+<ol>
+<li>建立连接阶段（即准备阶段）</li>
+<li>数据同步阶段</li>
+<li>命令传播阶段</li>
+</ol>
+<figure data-type="image" tabindex="1"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306204513274.png" alt="image-20200306204513274" loading="lazy"></figure>
+<h4 id="阶段1建立连接阶段工作流程">阶段1：建立连接阶段工作流程</h4>
+<p>步骤：</p>
+<ol>
+<li>slave端设置master的地址与端口，通过slaveof ip port与master相互连接，在slave端保存master相应的信息</li>
+<li>建立socket连接，用于master与slave端传递信息</li>
+<li>slave周期性的对master发送ping命令（定时器任务），保证master在线</li>
+<li>如果master设置了密码，进行身份验证</li>
+<li>slave将端口信息发送给master，master保存slave的端口信息</li>
+</ol>
+<p>状态：</p>
+<ul>
+<li>slave：保存master的地址与端口</li>
+<li>master：保存slave的端口</li>
+</ul>
+<p>总体：之间创建了连接的socket</p>
+<figure data-type="image" tabindex="2"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306210130500.png" alt="" loading="lazy"></figure>
 <blockquote>
-<p>key的设置约定</p>
+<p>主从连接方式</p>
 </blockquote>
-<p>表名：主键名：主键值：字段名</p>
+<p>方式一：客户端发送指令</p>
+<pre><code>slaveof &lt;masterip&gt; &lt;masterport&gt;
+</code></pre>
+<p>方式二：启动服务器时携带参数</p>
+<pre><code>redis-server --slaveof &lt;masterip&gt; &lt;masterport&gt;
+</code></pre>
+<p>方式三：服务器配置*</p>
+<pre><code>slaveof &lt;masterip&gt; &lt;masterport&gt;
+</code></pre>
+<p>断开连接方式：</p>
+<pre><code>slaveof no one
+</code></pre>
 <hr>
-<h4 id="数据类型">数据类型</h4>
-<blockquote>
-<p>string类型</p>
-</blockquote>
+<h4 id="阶段2数据同步阶段工作流程">阶段2：数据同步阶段工作流程</h4>
+<p>步骤：</p>
+<ol>
+<li>slave发送psync2指令，请求master同步数据</li>
+<li>master创建RDB同步数据</li>
+<li>slave恢复RDB同步数据</li>
+<li>slave向master请求部分同步数据</li>
+<li>slave恢复部分同步数据</li>
+</ol>
+<p>状态：</p>
 <ul>
-<li>存储的数据：单个数据，最简单的数据存储类型，也是最常用的数据存储类型</li>
-<li>存储数据的格式：一个存储空间保存一个数据</li>
-<li>存储内容：通常使用字符串，如果字符串以整数的形式是展示，可以作为数字操作使用</li>
+<li>slave：具有master端全部数据，包括RDB过程接收的数据</li>
+<li>master：保存slave当前数据同步的位置</li>
+</ul>
+<p>总体：之间完成了数据克隆</p>
+<figure data-type="image" tabindex="3"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306211502117.png" alt="" loading="lazy"></figure>
+<blockquote>
+<p>说明</p>
+</blockquote>
+<p>master：</p>
+<ol>
+<li>如果master数据量巨大，数据同步阶段应避开流量高峰期，避免造成master阻塞，影响业务正常执行</li>
+<li>复制缓冲区大小设定不合理，会造成数据溢出。如进行全量复制周期太长，进行部分复制时发现数据已经存在丢失的情况，必须进行第二次全量复制，致使slave陷入死循环状态。</li>
+</ol>
+<pre><code>repl-backlog-size 1mb
+</code></pre>
+<ol start="3">
+<li>master单机内存占用主机内存的比例不应过大，建议使用50%-70%的内存，留下30%-50%的内存用于执行bgsave命令和创建复制缓冲区</li>
+</ol>
+<p>slave：</p>
+<ol>
+<li>为避免slave进行全量复制、部分复制时服务器响应阻塞或数据不同步，建议关闭此期间的对外服务</li>
+</ol>
+<pre><code>slave-serve-stale-data yes|no
+</code></pre>
+<ol start="2">
+<li>数据同步阶段，master发送给slave信息可以理解为master是slave的一个客户端，主动向slave发送命令</li>
+<li>多个slave同时对master请求数据同步，master发送的RDB文件增多，会对带宽造成巨大冲击，如果master带宽不足，因此数据同步需要根据业务需求，适量错峰</li>
+<li>slave过多时，建议调整拓扑结构，由一主多从结构变为树状结构，中间节点即是master，也是slave。注意使用树状结构时，由于层级深度，导致深度越高的slave与最顶层master间数据同步延迟较大，数据一致性变差，应谨慎选择</li>
+</ol>
+<h5 id="部分复制的三个核心要素">部分复制的三个核心要素</h5>
+<blockquote>
+<p>服务器的运行id</p>
+</blockquote>
+<p>概念：服务器的运行ID是每一台服务器每次运行的身份识别码，一台服务器多次运行可以生成多个运行id</p>
+<p>组成：运行id由40位字符组成，是一个随机的十六进制字符</p>
+<p>作用：运行id被用于在服务器间进行传输，识别身份</p>
+<p>实现方式：运行id在每台服务器启动时自动生成，master在首次连接slave时，会将自己的运行id发送给slave，slave保存此id，通过info Server命令，可以查看节点的runid</p>
+<blockquote>
+<p>复制缓冲区</p>
+</blockquote>
+<p>概念：复制缓冲区，又名复制积压区，是一个先进先出的队列，用于存储服务器执行的命令，每次传播命令，master都会将传播的命令记录下来，并存储在复制缓冲区中（默认大小1M）</p>
+<p>组成：偏移量、字节值</p>
+<p>作用：用于保存master收到的所有指令（仅影响数据变更的指令）</p>
+<p>数据来源：当master接收到主客户端的指令时，除了将指令执行，会将该指令存储到缓冲区中</p>
+<blockquote>
+<p>复制偏移量</p>
+</blockquote>
+<p>概念：一个数字，描述复制缓冲区中的指令字节位置</p>
+<p>分类：</p>
+<ul>
+<li>master复制偏移量：记录发送给所有slave的指令字节对应的位置（多个）</li>
+<li>slave复制偏移量：记录slave接收master发送过来的指令字节的位置（一个）</li>
+</ul>
+<p>数据来源：</p>
+<ul>
+<li>master：发送一次记录一次</li>
+<li>slave端：接收一次记录一次</li>
+</ul>
+<p>作用：信息同步，对比master与slave的差异，当slave断线后，恢复数据使用</p>
+<h5 id="心跳机制">心跳机制</h5>
+<ul>
+<li>进入命令传播阶段，master与slave之间需要进行信息交换，采用心跳机制实现双方连接保持在线</li>
+<li>master心跳：
+<ul>
+<li>指令：PING</li>
+<li>周期：由repl-ping-slave-period决定，默认为10秒</li>
+<li>作用：判断slave是否在线</li>
+<li>查询：INFO replication    //获取slave最后一次连接的时间间隔，lag项维持在0或1视为正常</li>
+</ul>
+</li>
+<li>slave心跳：
+<ul>
+<li>指令：REPLCONF ACK {offset}</li>
+<li>周期：1秒</li>
+<li>作用：
+<ul>
+<li>向master汇报自己所复制的偏移量，判断是否一致，不一致则获取新的数据变更指令</li>
+<li>判断master是否在线</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <blockquote>
-<p>hash类型</p>
+<p>心跳阶段注意事项</p>
 </blockquote>
 <ul>
-<li>存储需求：对一系列存储的数据进行编组，方便管理，典型应用存储对象信息</li>
-<li>需要的存储结构：一个存储空间保存多个键值对数据</li>
-<li>hash：底层使用哈希表结构实现数据存储</li>
+<li>当slave多数掉线，或延迟过高时，master为保障数据稳定性，将拒绝所有信息同步操作</li>
 </ul>
-<blockquote>
-<p>list类型</p>
-</blockquote>
+<pre><code>min-slaves-to-write 2
+min-slaves-max-lag 10
+注：slave数量小于2或是所有slave的延迟都大于10秒时，强制关闭slave的写功能，停止数据同步
+</code></pre>
 <ul>
-<li>存储需求：存储多个数据，并对数据进入存储空间的顺序进行区分</li>
-<li>需要的存储结构：一个存储空间保存多个数据，且通过数据可以体现进入顺序</li>
-<li>list：保存多个数据，底层使用双向链表存储结构实现</li>
-</ul>
-<blockquote>
-<p>set类型</p>
-</blockquote>
-<ul>
-<li>存储需求：存储大量的数据，在查询方面提供跟高的效率</li>
-<li>需要的存储结构：能够保存大量的数据，高效的内部存储机制，便于查询</li>
-<li>set：与hash的存储结构完全相同，将值存储于hash的key中，hash的value中存储nil，并且值不允许重复</li>
-</ul>
-<blockquote>
-<p>sorted_set类型</p>
-</blockquote>
-<ul>
-<li>存储需求：数据排序有利于数据的有效展示，需要提供一种可以根据自身特征进行排序的方式</li>
-<li>需要的存储结构：新的存储模型，可以保存可排序的数据</li>
-<li>sorted_set：在set的存储结构基础上添加可排序字段</li>
+<li>slave数量和延迟由slave发送<strong>REPLCONF ACK</strong>命令确认</li>
 </ul>
 <hr>
-<h3 id="redis的基本操作">Redis的基本操作</h3>
-<h4 id="string类型">String类型</h4>
+<h4 id="阶段3数据同步与命令传播阶段的工作流程">阶段3：数据同步与命令传播阶段的工作流程</h4>
+<figure data-type="image" tabindex="4"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306144921188.png" alt="image-20200306144921188" loading="lazy"></figure>
+<hr>
+<h4 id="授权访问">授权访问</h4>
+<p>master：</p>
+<pre><code>配置文件中：
+require &lt;password&gt;
+执行时：
+config set requirepass &lt;password&gt;
+config get requirepass
+</code></pre>
+<p>slave:</p>
+<pre><code>配置文件中：
+masterauth &lt;password&gt;
+启动时：
+redis-cli -a &lt;password&gt;
+执行时：
+auth &lt;password&gt;
+</code></pre>
+<hr>
+<h3 id="主从复制常见问题">主从复制常见问题</h3>
+<h4 id="频繁的全量复制">频繁的全量复制</h4>
 <blockquote>
-<p>信息添加</p>
+<p>频繁的全量复制1</p>
 </blockquote>
 <ul>
 <li>
-<p>功能：设置 key value</p>
+<p>条件：伴随着系统运行，master的数据量会越来越大，一旦master重启，runid将发生变化，会引起slave的全量复制操作</p>
+<p>内部优化调整方案：</p>
+<ol>
+<li>
+<p>master内部创建master_replid变量，使用runid相同的策略生成，长度41位，并发送给所有slave</p>
 </li>
 <li>
-<p>命令</p>
+<p>在master关闭时执行 shutdown save，进行RDB持久化，将runid与offset保存到RDB文件中</p>
+<ul>
+<li>
+<p>repl-id	repl-offset</p>
+</li>
+<li>
+<p>通过redis-check-rdb命令可以查看该信息</p>
 </li>
 </ul>
-<pre><code>set key value
+</li>
+<li>
+<p>master重启后加载RDB文件，恢复数据</p>
+<p>重启后，将RDB文件保存到repl-id与repl-offset加载到内存中</p>
+<ul>
+<li>master_repl_id = repl	master_repl_offset = repl-offset</li>
+<li>通过info命令可以查看该信息</li>
+</ul>
+</li>
+</ol>
+<p>作用：本机保存上次runid，重启后恢复该值，使所有slave认为还是之前的master</p>
+</li>
+</ul>
+<blockquote>
+<p>频繁的全量复制2</p>
+</blockquote>
+<ul>
+<li>条件：网络环境不佳，出现网络中断，slave不提供服务</li>
+<li>出现原因：复制缓冲区过小，断网后slave的offset越界，触发全量复制</li>
+</ul>
+<p>解决方案：</p>
+<ul>
+<li>修改复制缓冲区大侠</li>
+</ul>
+<pre><code>repl-backlog-size
+</code></pre>
+<p>建议设置如下：</p>
+<ol>
+<li>测算冲master到slave的重连平均时长second</li>
+<li>获取maser平均每秒产生写命令数据总量write_size_per_second</li>
+<li>最优复制缓冲区空间 = 2 * second * write_size_per_second</li>
+</ol>
+<h4 id="频繁的网络中断">频繁的网络中断</h4>
+<blockquote>
+<p>频繁的网络中断1</p>
+</blockquote>
+<ul>
+<li>条件：master的CPU占用过高或slave频繁断开连接</li>
+<li>出现原因：
+<ul>
+<li>slave每1秒发送REPLCONF ACK命令到master</li>
+<li>当slave接收到了慢查询（key *，hgetall等）时，会占用大量CPU性能</li>
+<li>master每1秒调用复制定时函数replicationCron()时，比对slave发现长时间未响应</li>
+</ul>
+</li>
+</ul>
+<p>解决方案：</p>
+<ul>
+<li>设置合理的超时时间，确认是否释放slave</li>
+</ul>
+<pre><code>repl-timeout	//该参数定义了超时时间的阈值（默认60秒），超过该值，释放slave
 </code></pre>
 <blockquote>
-<p>信息查询</p>
+<p>频繁的网络中断2</p>
+</blockquote>
+<ul>
+<li>条件：slave与master断开</li>
+<li>出现原因：
+<ul>
+<li>master发送ping指令的频度较低</li>
+<li>master设定超时时间较短</li>
+<li>ping指令在网络中存在丢包</li>
+</ul>
+</li>
+</ul>
+<p>解决方案：</p>
+<ul>
+<li>提高ping指令的发送频度</li>
+</ul>
+<p>**注意：**超时时间repl-timeout的时间至少是ping指令频度的5-10倍，否则slave很容易判定超时</p>
+<h4 id="数据不一致">数据不一致</h4>
+<ul>
+<li>条件：多个slave获取相同数据不同步</li>
+<li>出现原因：网络信息不同步，数据发送有延迟</li>
+</ul>
+<p>解决方案：</p>
+<ul>
+<li>优化主从间的网络环境，通常放置在同一个机房部署，如果使用云服务器要注意此现象</li>
+<li>监控主从节点延迟（通过offset）判断，如果slave延迟过大，暂时屏蔽程序对该slave的数据访问</li>
+</ul>
+<pre><code>slave-serve-stale-data yes|no	
+//开启后仅响应info、slaveof等少数命令（慎用，除非对数据一致性要求很高）
+</code></pre>
+<hr>
+<h2 id="哨兵模式">哨兵模式</h2>
+<blockquote>
+<p>简介</p>
+</blockquote>
+<p>哨兵（sentinel）是一个分布式系统，用于对主从结构中的每台服务器进行监控，当出现故障时通过投票机制选择新的master并将所有slave连接到新的master。</p>
+<blockquote>
+<p>作用</p>
 </blockquote>
 <ul>
 <li>
-<p>功能：根据 key 查询 value</p>
+<p>监控</p>
+<p>不断的检查master和slave是否正常运行</p>
+<p>master存活检测、master与slave运行情况检测</p>
 </li>
 <li>
-<p>命令</p>
+<p>通知（提醒）</p>
+<p>当被监控的服务器出现问题时，向其他（哨兵间、客户端）发送通知</p>
+</li>
+<li>
+<p>自动故障转移</p>
+<p>断开master与slave连接，选取一个slave作为master，将其他slave连接到新的master，并告知客户端新的master的地址</p>
 </li>
 </ul>
-<pre><code>get key
+<p>**注意：**哨兵也是一台redis服务器，只是不提供数据服务，并且通常哨兵配置数量为单数</p>
+<h3 id="配置哨兵">配置哨兵</h3>
+<p>通过配置文件配置，配置后使用命令启动</p>
+<ul>
+<li>配置文件</li>
+</ul>
+<pre><code class="language-linux">[root@localhost redis-4.0.6]# cat sentinel.conf | grep -v &quot;#&quot; | grep -v &quot;^$&quot;
+port 26379
+dir /tmp
+sentinel monitor mymaster 127.0.0.1 6379 2
+sentinel down-after-milliseconds mymaster 30000
+sentinel parallel-syncs mymaster 1
+sentinel failover-timeout mymaster 180000
+----------------------------------------------------------------------------
+以上分别为：
+端口号
+路径
+监控的master 地址 端口号 哨兵认定数量
+连接未响应时长
+重设master后同时同步数量
+认定下线时间（毫秒）
 </code></pre>
+<ul>
+<li>启动命令</li>
+</ul>
+<pre><code class="language-redis">redis-sentinel sentinel-端口号.conf
+</code></pre>
+<ul>
+<li>连接命令</li>
+</ul>
+<pre><code>redis-cli -p 端口号
+</code></pre>
+<p>**注意：**在服务启动后哨兵的配置文件会发生改变</p>
+<h3 id="工作原理">工作原理</h3>
 <blockquote>
-<p>信息删除</p>
+<p>阶段一：监控阶段</p>
 </blockquote>
 <ul>
 <li>
-<p>功能：删除 key value</p>
+<p>用于同步各个节点的状态信息</p>
+<ul>
+<li>获取各个sentinel的状态（是否在线）</li>
+<li>获取master的状态
+<ul>
+<li>master属性
+<ul>
+<li>runid</li>
+<li>role：master</li>
+</ul>
+</li>
+<li>各个slave的详细信息</li>
+</ul>
+</li>
+<li>获取所有slave的状态（根据master中的slave信息）
+<ul>
+<li>slave属性
+<ul>
+<li>runid</li>
+<li>role：slave</li>
+<li>master_host、master_port</li>
+<li>offset</li>
+<li>......</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 <li>
-<p>命令</p>
+<p>工作内容：</p>
+<ol>
+<li>第一个sentinel与master进行连接后，发送info指令</li>
+<li>建立长期cmd连接，sentinal同时保存所有哨兵状态，master中记录redis实例信息</li>
+<li>通过master中的slave信息与其中的slave进行连接并发送info指令</li>
+<li>第二个sentinel进入，与master连接发送info指令，发现master端的sentinels中有信息</li>
+<li>与第一个sentinel建立连接并同步信息，互相发送ping命令保证对方在线，并于master建立cmd连接</li>
+</ol>
 </li>
 </ul>
-<pre><code>del key
-</code></pre>
+<figure data-type="image" tabindex="5"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306182151521.png" alt="" loading="lazy"></figure>
 <blockquote>
-<p>添加/修改多个数据</p>
+<p>通知阶段</p>
 </blockquote>
-<pre><code>mset key1 value1 key2 value2 ...
-</code></pre>
-<blockquote>
-<p>获取多个数据</p>
-</blockquote>
-<pre><code>mget key1 key2 ...
-</code></pre>
-<blockquote>
-<p>获取数据字符个数（字符串长度）</p>
-</blockquote>
-<pre><code>strlen key
-</code></pre>
-<blockquote>
-<p>追加信息到原始信息后</p>
-</blockquote>
-<pre><code>append key value
-</code></pre>
-<blockquote>
-<p>设置数值数据增加/减少指定范围的值</p>
-</blockquote>
-<pre><code>incr/decr key
-incrby/decrby key integerNumber
-incrbyfloat key floatNumber
-</code></pre>
-<blockquote>
-<p>设置指定时常的生命周期的数据</p>
-</blockquote>
-<pre><code>setex key seconds value		
-psetex key milliseconds		
-
-</code></pre>
-<p><strong>注意事项：</strong></p>
 <ul>
-<li>数据操作返回值
+<li>工作内容：由其中一个sentinel通过建立的cmd连接获取主从机的工作状态，获取到信息并且与相互连接的其他sentinel之间进行信息同步。</li>
+</ul>
+<figure data-type="image" tabindex="6"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306181804282.png" alt="image-20200306181804282" loading="lazy"></figure>
+<blockquote>
+<p>故障转移阶段</p>
+</blockquote>
 <ul>
-<li>表示数据运行结果是否成功，成功：(integer)1、失败：(integer)0</li>
-<li>表示运行结果值，如：(integer)3</li>
+<li>故障转移阶段引起原因：</li>
+</ul>
+<ol>
+<li>其中一台sentinel多次获取master状态失败</li>
+<li>将master中标记为SRI_S_DOWN（主观下线）</li>
+<li>在sentinel之间传播，表示发现master掉线</li>
+<li>其他sentinel连接master</li>
+<li>连接失败的sentinel在sentinel之间表示发现master掉线</li>
+<li>连接失败的sentinel占sentinel总数超过一半时，将master标记为SRI_O_DOWN（客观下线），确定master掉线</li>
+</ol>
+<figure data-type="image" tabindex="7"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306184201644.png" alt="image-20200306184201644" loading="lazy"></figure>
+<ul>
+<li>选出sentinel担任处置工作：</li>
+</ul>
+<ol>
+<li>所有的sentinel同时对其余的sentinel发送一条指令（SENTINEL is-master-down-by...），其中包含：下线的ip、下线的端口、竞选次数、runid</li>
+<li>通过循环的投票机制，选出一台sentinel担任处置工作
+<ul>
+<li>投票机制：每个sentinel均是投票者也是参选者，例如：当前有五台sentinel，其中4台sentinel会同时向剩余的一台sentinel发送自己的信息，剩余这台的sentinel会将自己的票投给信息最先到达的sentinel，最后通过所有投票情况选出获得票数最多的sentinel。</li>
 </ul>
 </li>
-<li>未获取到数据
+</ol>
+<figure data-type="image" tabindex="8"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%9B%86%E7%BE%A4.assets%5Cimage-20200306202853958.png" alt="image-20200306202853958" loading="lazy"></figure>
 <ul>
-<li>(nil) 等同于null</li>
+<li>
+<p>通过投票机制产生的sentinel从服务器列表中选择出备选的master</p>
+<ul>
+<li>担任master的选择方式：
+<ol>
+<li>在线的</li>
+<li>响应速度快的</li>
+<li>与原master断开时间短的</li>
+<li>优先原则：
+<ol>
+<li>优先级</li>
+<li>offset</li>
+<li>runid</li>
+</ol>
+</li>
+</ol>
+</li>
 </ul>
 </li>
-<li>数据最大存储量：512MB</li>
+<li>
+<p>发送指令</p>
+<ol>
+<li>向新的master发送slaveof no one，表示与master断开连接</li>
+<li>向其他slave发送slaveof 新master的IP 端口，使其他slave与新master产生主从关系</li>
+</ol>
+</li>
 </ul>
-<hr>
-<h4 id="hash类型">Hash类型</h4>
-<blockquote>
-<p>添加/修改数据</p>
-</blockquote>
-<pre><code>hset key field value
-hsetnx key field value 		//如果库中存在key则不添加
-
-</code></pre>
-<blockquote>
-<p>获取数据</p>
-</blockquote>
-<pre><code>hget key field
-hgetall key			//获取全部
-
-</code></pre>
-<blockquote>
-<p>删除数据</p>
-</blockquote>
-<pre><code>hdel key field1 [field2]
-
-</code></pre>
-<blockquote>
-<p>添加/修改多个数据</p>
-</blockquote>
-<pre><code>hmset key field1 value1 field2 value2 ...
-
-</code></pre>
-<blockquote>
-<p>获取数据</p>
-</blockquote>
-<pre><code>hmget key field1 field2 ...
-
-</code></pre>
-<blockquote>
-<p>获取哈希表中的字数</p>
-</blockquote>
-<pre><code>hlen key
-
-</code></pre>
-<blockquote>
-<p>获取哈希表中是否存在指定字段</p>
-</blockquote>
-<pre><code>hexists key field
-
-</code></pre>
-<blockquote>
-<p>获取哈希表中所有的字段名或字段值</p>
-</blockquote>
-<pre><code>hkeys key
-hvals key
-
-</code></pre>
-<blockquote>
-<p>设置指定字段的数值数据增加指定范围的值</p>
-</blockquote>
-<pre><code>hincrby key field integerNumber
-hincrbyfloat key field floatNumber
-
-</code></pre>
-<p><strong>注意事项：</strong></p>
-<ul>
-<li>hash类型下的value只能存储字符串，不允许存储其他数据类型</li>
-<li>每个hash可以存储2<sup>32</sup>-1个键值对</li>
-<li>hash类型十分贴近对象的数据存储形式，并且可以灵活的添加或删除对象属性，但hash设计初衷并不是为了存储大量对象，所以不可滥用，更不可将hash作为对象列表使用</li>
-<li>hgetall可以获取全部属性，但是如果内部field过多，会导致遍历整体数据效率变低，成为数据访问瓶颈</li>
-</ul>
-<hr>
-<h4 id="list类型">List类型</h4>
-<blockquote>
-<p>添加/修改数据</p>
-</blockquote>
-<pre><code>lpush key value1 [value2] ...	//左进入
-rpush key value1 [value2] ...	//右进入
-
-</code></pre>
-<blockquote>
-<p>获取数据</p>
-</blockquote>
-<pre><code>lrange key start stop
-lindex key index
-llen key
-
-</code></pre>
-<blockquote>
-<p>获取并移除数据</p>
-</blockquote>
-<pre><code>lpop key
-rpop key
-
-</code></pre>
-<blockquote>
-<p>规定时间内获取并移除数据</p>
-</blockquote>
-<pre><code>blpop key1 [key2] timeout
-brpop key1 [key2] timeout
-
-</code></pre>
-<blockquote>
-<p>移除指定数据</p>
-</blockquote>
-<pre><code>lrem key count value
-
-</code></pre>
-<p><strong>注意事项：</strong></p>
-<ul>
-<li>list中保存的数据都是string类型的，最多容纳2<sup>32</sup>-1条数据</li>
-<li>list具有索引的概念，但是操作时通常以队列的形式进行出入队操作，或以栈形式进行出入栈操作</li>
-<li>获取全部数据操作的结束索引设置为-1</li>
-<li>list可以对数据进行分页操作，通常第一页信息来自于list，第二页及更多信息通过数据库加载</li>
-</ul>
-<hr>
-<h4 id="set类型">Set类型</h4>
-<blockquote>
-<p>添加数据</p>
-</blockquote>
-<pre><code>sadd key member1 [member2]
-
-</code></pre>
-<blockquote>
-<p>获取全部数据</p>
-</blockquote>
-<pre><code>semebers key
-
-</code></pre>
-<blockquote>
-<p>删除数据</p>
-</blockquote>
-<pre><code>srem key member1 [member2]
-
-</code></pre>
-<blockquote>
-<p>获取集合数据总量</p>
-</blockquote>
-<pre><code>scard key
-
-</code></pre>
-<blockquote>
-<p>判断集合中是否包含指定数据</p>
-</blockquote>
-<pre><code>sismember key member
-
-</code></pre>
-<blockquote>
-<p>随机获取集合中指定数量的数据</p>
-</blockquote>
-<pre><code>srandmember key [count]
-
-</code></pre>
-<blockquote>
-<p>随机获取集合中的某个数据并将该数据移出集合</p>
-</blockquote>
-<pre><code>spop key [count]
-
-</code></pre>
-<blockquote>
-<p>求两个集合的交、并、差集</p>
-</blockquote>
-<pre><code>sinter key1 [key...]
-sunion key1 [key...]
-sdiff key1 [key...]
-
-</code></pre>
-<blockquote>
-<p>求两个集合的交、并、差集并存到指定集合中</p>
-</blockquote>
-<pre><code>sinterstore destination key1 [key...]
-sunionstore destination key1 [key...]
-sdiffstore destination key1 [key...]
-
-</code></pre>
-<blockquote>
-<p>将指定数据从原始集合中移动到目标集合中</p>
-</blockquote>
-<pre><code>smove source destination member
-
-</code></pre>
-<p><strong>注意事项：</strong></p>
-<ul>
-<li>set类型不允许数据重复，如果添加的数据在set中已存在，将只保留一份</li>
-<li>set虽然与hash的存储结构相同，但是无法启用hash中存储值的空间</li>
-</ul>
-<hr>
-<h4 id="sorted_set类型">Sorted_set类型</h4>
-<blockquote>
-<p>添加数据</p>
-</blockquote>
-<pre><code>zadd key score1 member1 [score member ...]
-
-</code></pre>
-<blockquote>
-<p>获取全部数据</p>
-</blockquote>
-<pre><code>zrange key start stop [WITHSCORES]
-zrevrange key start stop [WITHSCORES]
-
-</code></pre>
-<blockquote>
-<p>删除数据</p>
-</blockquote>
-<pre><code>zrem key member [member ...]
-
-</code></pre>
-<blockquote>
-<p>按条件获取数据</p>
-</blockquote>
-<pre><code>zrangebyrescore key min max [WITHSCORES] [LIMIT]
-zrevrangebyscore key min max [WITHSCORES] [LIMIT]
-
-</code></pre>
-<blockquote>
-<p>条件删除数据</p>
-</blockquote>
-<pre><code>zremrangebyrank key start stop
-zremrangebyscore key min max
-
-</code></pre>
-<blockquote>
-<p>获取集合数据总量</p>
-</blockquote>
-<pre><code>zcard key
-zcount key min max
-
-</code></pre>
-<blockquote>
-<p>集合交、并操作</p>
-</blockquote>
-<pre><code>zinterstore destination numkeys key [key ...]
-zunionstore destination numkeys key [key ...]
-
-</code></pre>
-<blockquote>
-<p>获取数据对应的索引（排名）</p>
-</blockquote>
-<pre><code>zrank key member
-zrevrank key member
-
-</code></pre>
-<blockquote>
-<p>score值获取与修改</p>
-</blockquote>
-<pre><code>zscore key member
-zincrby key increment 
-
-</code></pre>
-<p><strong>注意事项：</strong></p>
-<ul>
-<li>score保存的数据存储空间是64位</li>
-<li>score保存的数据也可以是一个双精度的double值，基于双精度浮点数的特征，可能会丢失精度，使用时需要谨慎</li>
-<li>sorted_set底层存储结构还是基于set的，因此数据不允许重复，如果重复添加数据，score值将被覆盖，保留最后一次修改的结果</li>
-</ul>
-<hr>
-<h3 id="通用命令">通用命令</h3>
-<h4 id="key的基本操作">key的基本操作</h4>
-<blockquote>
-<p>删除指定key</p>
-</blockquote>
-<pre><code>del key
-
-</code></pre>
-<blockquote>
-<p>获取key是否存在</p>
-</blockquote>
-<pre><code>exists key
-
-</code></pre>
-<blockquote>
-<p>获取key的类型</p>
-</blockquote>
-<pre><code>type key
-
-</code></pre>
-<blockquote>
-<p>查询key</p>
-</blockquote>
-<pre><code>keys pattern
-* 匹配任意数量的任意符号
-? 匹配任意一个符号
-[] 匹配一个指定的符号
-
-</code></pre>
-<blockquote>
-<p>改变key的名字</p>
-</blockquote>
-<pre><code>rename key newkey
-renamenx key newkey
-
-</code></pre>
-<blockquote>
-<p>对所有key排序</p>
-</blockquote>
-<pre><code>sort
-
-</code></pre>
-<p><strong>时效性操作：</strong></p>
-<blockquote>
-<p>为指定的key设置有效期</p>
-</blockquote>
-<pre><code>expire key seconds
-pexpire key milliseconds
-expireat key timestamp
-pexpireat key milliseconds
-
-</code></pre>
-<blockquote>
-<p>获取key的有效时间</p>
-</blockquote>
-<pre><code>ttl key
-pttl key
-
-</code></pre>
-<blockquote>
-<p>将key从时效性转换为永久性</p>
-</blockquote>
-<pre><code>persist key
-
-</code></pre>
-<hr>
-<h4 id="数据库基本操作">数据库基本操作</h4>
-<ul>
-<li>redis为每个服务提供有16个数据库，编号从0-15</li>
-<li>每个数据库之间的数据相互独立</li>
-</ul>
-<blockquote>
-<p>切换数据库</p>
-</blockquote>
-<pre><code>select index
-
-</code></pre>
-<blockquote>
-<p>数据移动</p>
-</blockquote>
-<pre><code>move key db
-
-</code></pre>
-<blockquote>
-<p>数据清除</p>
-</blockquote>
-<pre><code>dbsize		//查看数据总量
-flushdb		//清除当前数据
-flushall	//清除全部数据
-
-</code></pre>
-<blockquote>
-<p>其他操作</p>
-</blockquote>
-<pre><code>quit
-ping
-echo message
-
-</code></pre>
-<hr>
-<h3 id="jdies">Jdies</h3>
-<blockquote>
-<p>Jedis简介</p>
-</blockquote>
-<p>Jedis是Java语言连接redis服务。</p>
-<hr>
-<h4 id="使用方式">使用方式</h4>
-<blockquote>
-<p>在pom文件中导入jedis的依赖。</p>
-</blockquote>
-<pre><code class="language-xml">        &lt;!-- jedis --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;redis.clients&lt;/groupId&gt;
-            &lt;artifactId&gt;jedis&lt;/artifactId&gt;
-            &lt;version&gt;3.2.0&lt;/version&gt;
-        &lt;/dependency&gt;
-
-</code></pre>
-<blockquote>
-<p>在类中进行连接</p>
-</blockquote>
-<pre><code class="language-java">        //1.连接redis
-        Jedis jedis = new Jedis(&quot;127.0.0.1&quot;, 6379);
-        //2.操作redis
-        jedis.set(&quot;name&quot;,&quot;squid&quot;);//Jedis中的方法名与redis中命令名完全一致
-        String name = jedis.get(&quot;name&quot;);
-        System.out.println(name);
-        //3.断开连接
-        jedis.close();
-
-</code></pre>
-<p>**注意：**从redis中取出的所有数据类型与java中的数据类型一一对应。</p>
-<hr>
-<h4 id="jedis工具类">Jedis工具类</h4>
-<pre><code class="language-java">public class JedisUtil {
-    private static JedisPool jedisPool = null;
-    private static Integer port = null;
-    private static Integer maxTotal = null;
-    private static Integer maxIdle = null;
-
-    static{
-        ResourceBundle resourceBundle = ResourceBundle.getBundle(&quot;redis&quot;);//获取配置文件
-        String host = resourceBundle.getString(&quot;redis.host&quot;);
-        port = Integer.valueOf(resourceBundle.getString(&quot;redis.port&quot;));
-        maxTotal = Integer.valueOf(resourceBundle.getString(&quot;redis.maxTotal&quot;));
-        maxIdle = Integer.valueOf(resourceBundle.getString(&quot;redis.maxIdle&quot;));
-
-        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setMaxTotal(maxTotal);//最大连接数
-        jedisPoolConfig.setMaxIdle(maxIdle);//活动连接数
-        jedisPool = new JedisPool(jedisPoolConfig,host,port);
-    }
-    public static Jedis getJedis(){
-        return jedisPool.getResource();
-    }
-}
-
-</code></pre>
-<hr>
-<h2 id="redis高级">Redis高级</h2>
-<h3 id="linux环境下的redis">Linux环境下的Redis</h3>
-<h4 id="在linux环境中安装redis">在Linux环境中安装redis</h4>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Redis高级]]></title>
+        <id>https://liuyuzheng8.github.io/post/redis-gao-ji/</id>
+        <link href="https://liuyuzheng8.github.io/post/redis-gao-ji/">
+        </link>
+        <updated>2020-03-06T13:17:56.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="redis高级">Redis高级</h1>
+<h2 id="linux环境下的redis">Linux环境下的Redis</h2>
+<h3 id="在linux环境中安装redis">在Linux环境中安装redis</h3>
 <blockquote>
 <p>下载安装包</p>
 </blockquote>
 <pre><code># wget http://download.redis.io/releases/redis-?.?.?.tar.gz
-
 </code></pre>
 <blockquote>
 <p>解压</p>
 </blockquote>
 <pre><code>tar -xvf 文件名.tar.gz
-
 </code></pre>
 <blockquote>
 <p>编译</p>
 </blockquote>
 <pre><code>make
-
 </code></pre>
 <blockquote>
 <p>安装</p>
 </blockquote>
 <pre><code>make install
-
 </code></pre>
 <hr>
-<h4 id="启动redis服务">启动Redis服务</h4>
+<h3 id="启动redis服务">启动Redis服务</h3>
 <blockquote>
 <p>直接启动</p>
 </blockquote>
@@ -628,13 +511,11 @@ echo message
 <li>进入redis下的src目录，打开redis-server</li>
 </ul>
 <pre><code># redis-server [port]
-
 </code></pre>
 <ul>
 <li>打开redis-cli</li>
 </ul>
 <pre><code># redis-cli [-h host] [-p port]
-
 </code></pre>
 <blockquote>
 <p>指定配置文件启动*</p>
@@ -648,10 +529,9 @@ echo message
 </li>
 </ul>
 <pre><code># redis-server [配置文件]
-
 </code></pre>
 <hr>
-<h3 id="持久化">持久化</h3>
+<h2 id="持久化">持久化</h2>
 <blockquote>
 <p>什么是持久化</p>
 </blockquote>
@@ -663,7 +543,7 @@ echo message
 <li>将当前数据状态进行保存，快照形式，存储数据结果，存储格式简单，关注点在数据（RDB）</li>
 <li>将数据的操作过程进行保存，日志形式，存储操作过程，存储格式复杂，关注点在数据的操作过程（AOF）</li>
 </ul>
-<h4 id="rdb方式">RDB方式</h4>
+<h3 id="rdb方式">RDB方式</h3>
 <blockquote>
 <p>命令</p>
 </blockquote>
@@ -673,7 +553,6 @@ save second changes		//作用：在一定时间内key的数量变化达到指定
 特殊形式：
 debug reload	//服务器运行过程中保存
 shutdown save	//关闭服务器时指定保存数据
-
 </code></pre>
 <p>**注意：**save指令的执行会阻塞当前Redis服务器，直到当前RDB过程完成为止，有可能会长时间阻塞，线上环境不建议使用；而bgsave是针对save阻塞问题做的优化，通过调用linux中的fork函数生成子进程保存，Redis中所有涉及到RDB操作都采用bgsave的方式，save命令可以放弃使用。</p>
 <blockquote>
@@ -757,7 +636,7 @@ shutdown save	//关闭服务器时指定保存数据
 <li>Redis的众多版本中未进行RDB文件格式的版本同一，有可能出现各版本之间数据格式无法兼容现象</li>
 </ul>
 <hr>
-<h4 id="aof方式">AOF方式</h4>
+<h3 id="aof方式">AOF方式</h3>
 <blockquote>
 <p>概念</p>
 </blockquote>
@@ -792,10 +671,9 @@ shutdown save	//关闭服务器时指定保存数据
 <pre><code class="language-linux">appendonly yes|no		//是否开启AOF持久化功能，默认为不开启状态
 appendfsync always|everysec|no		//AOF写数据策略
 appendfilename filename		//AOF持久化文件名，默认文件名为appendonly.aof,建议								  配置为appendonly-端口号.aof
-
 </code></pre>
 <hr>
-<h5 id="aof重写">AOF重写</h5>
+<h4 id="aof重写">AOF重写</h4>
 <blockquote>
 <p>作用</p>
 </blockquote>
@@ -811,17 +689,15 @@ appendfilename filename		//AOF持久化文件名，默认文件名为appendonly.
 <li>手动重写</li>
 </ul>
 <pre><code class="language-linux">bgrewriteaof
-
 </code></pre>
 <ul>
 <li>自动重写</li>
 </ul>
 <pre><code>auto-aof-rewrite-min-size size
 auto-aof-rewrite-percentage percentage
-
 </code></pre>
 <hr>
-<h4 id="rdb与aof对比">RDB与AOF对比</h4>
+<h3 id="rdb与aof对比">RDB与AOF对比</h3>
 <table>
 <thead>
 <tr>
@@ -864,7 +740,7 @@ auto-aof-rewrite-percentage percentage
 </tbody>
 </table>
 <hr>
-<h3 id="事务">事务</h3>
+<h2 id="事务">事务</h2>
 <blockquote>
 <p>简介</p>
 </blockquote>
@@ -876,7 +752,6 @@ auto-aof-rewrite-percentage percentage
 <pre><code>multi		//设置事务的开启位置，此指令执行后，后续的所有指令均加入到事务中
 exec		//设置事务的结束位置，同时执行事务。与multi成对出现，成对使用
 discard		//终止当前事务的定义，发生在multi之后，exec之前
-
 </code></pre>
 <p>**注意：**已经执行完毕的命令对应的数据不会自动回滚，需要程序员在代码中实现回滚。</p>
 <blockquote>
@@ -885,7 +760,6 @@ discard		//终止当前事务的定义，发生在multi之后，exec之前
 <p>事务锁：</p>
 <pre><code>watch key1 [key2...]	//对key添加监视锁，在执行exec前如果key发生了变化，终止事							务执行
 unwatch					//取消对所有key的监视
-
 </code></pre>
 <p>分布式锁：</p>
 <pre><code>setnx lock-key value	//使用setnx设置一个公共锁
@@ -893,14 +767,13 @@ del lock-key			//删除一个公共锁
 添加时间设定的锁：
 expire lock-key second
 pexpire lock-key milliseconds
-
 </code></pre>
 <p>​		利用setnx命令的返回值特征，有值返回则设置失败，无值返回则设置成功：</p>
 <p>​				1.对于返回设置成功的，拥有控制权，进行下一步的具体业务操作</p>
 <p>​				2.对于返回设置失败的，不具有控制权，排队或等待</p>
 <hr>
-<h3 id="删除策略">删除策略</h3>
-<h4 id="数据删除策略">数据删除策略</h4>
+<h2 id="删除策略">删除策略</h2>
+<h3 id="数据删除策略">数据删除策略</h3>
 <blockquote>
 <p>Redis中数据的特征</p>
 </blockquote>
@@ -913,13 +786,13 @@ pexpire lock-key milliseconds
 <blockquote>
 <p>Redis中时效性数据的存储结构</p>
 </blockquote>
-<figure data-type="image" tabindex="1"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis.assets%5Cimage-20200303190338409.png" alt="image-20200303190338409" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis%5CRedis%E9%AB%98%E7%BA%A7.assets%5Cimage-20200303190313869.png" alt="image-20200303190338409" loading="lazy"></figure>
 <blockquote>
 <p>目标</p>
 </blockquote>
 <p>在内存占用与CPU占用之间寻找一种平衡，顾此失彼都会造成整体redis性能的下降，甚至引发服务器宕机或内存泄漏</p>
 <hr>
-<h5 id="定时删除">定时删除</h5>
+<h4 id="定时删除">定时删除</h4>
 <ul>
 <li>创建一个定时器，当key设置有过期时间，且过期时间到达时，由定时器任务立即执行对键的删除操作。</li>
 <li>优点：节约内存，到时就删除，快速释放掉不必要的内存占用</li>
@@ -927,7 +800,7 @@ pexpire lock-key milliseconds
 <li>总结：用处理器性能换取存储空间</li>
 </ul>
 <hr>
-<h5 id="惰性删除">惰性删除</h5>
+<h4 id="惰性删除">惰性删除</h4>
 <ul>
 <li>数据到达过期时间，不做处理，等下次访问该数据时删除</li>
 <li>优点：节约CPU性能，发现必须删除的时候才删除</li>
@@ -935,7 +808,7 @@ pexpire lock-key milliseconds
 <li>总结：用存储空间换取处理器性能</li>
 </ul>
 <hr>
-<h5 id="定期删除">定期删除</h5>
+<h4 id="定期删除">定期删除</h4>
 <pre><code>* Redis启动服务器初始化时，读取配置server.hz的值，默认为10
 * 每秒钟执行server.hz次 serverCron() -&gt; databaseCron() -&gt; activeExpireCycle()
 * activeExpireCycle()对每个expire[*]（每个数据库对应一个expire）逐一进行检测，每	次执行250ms/server.hz
@@ -945,7 +818,6 @@ pexpire lock-key milliseconds
       * 如果一轮中删除的kshaney的数量≤W*25%，检查下一个expire[\*]，0-15循环
       * W取值=ACTIVE_EXPIRE_CYCLE_LOOKUPS_PER_LOOP属性值
 * 参数current_db用于记录activeExpireCycle()进入哪个expire[*]执行
-
 </code></pre>
 <ul>
 <li>周期性轮询redis库中的时效性数据，采用随机抽取的策略，利用过期数据占比的方式控制删除频度</li>
@@ -955,7 +827,7 @@ pexpire lock-key milliseconds
 </ul>
 <p><strong>在Redis中，同时使用 惰性删除 与 定期删除 两种策略。</strong></p>
 <hr>
-<h4 id="数据逐出策略">数据逐出策略</h4>
+<h3 id="数据逐出策略">数据逐出策略</h3>
 <blockquote>
 <p>什么是逐出算法</p>
 </blockquote>
@@ -967,7 +839,6 @@ pexpire lock-key milliseconds
 <pre><code>maxmemory			//最大可使用内存，为物理占用内存的比例，默认0，生产环境中一般					设置50%以上
 maxmemory-samples	//每次选取待删除数据的个数
 maxmemory-policy	//达到最大内存后的逐出策略
-
 </code></pre>
 <p>可选的逐出策略：</p>
 <ul>
@@ -994,7 +865,7 @@ maxmemory-policy	//达到最大内存后的逐出策略
 <li>no-enviction：禁止驱逐，会引发OOM</li>
 </ol>
 <hr>
-<h3 id="服务器配置">服务器配置</h3>
+<h2 id="服务器配置">服务器配置</h2>
 <blockquote>
 <p>基础配置</p>
 </blockquote>
@@ -1025,8 +896,8 @@ timeout						//客户端闲置等待最大时常，达到最大值后关闭连�
 
 </code></pre>
 <hr>
-<h3 id="高级数据类型">高级数据类型</h3>
-<h4 id="bitmaps">Bitmaps</h4>
+<h2 id="高级数据类型">高级数据类型</h2>
+<h3 id="bitmaps">Bitmaps</h3>
 <blockquote>
 <p>简介</p>
 </blockquote>
@@ -1047,7 +918,7 @@ bitop op destkey key1 [key2...]	//对指定key进行位运算并将结果保存�
 
 </code></pre>
 <hr>
-<h4 id="hyperloglog">HyperLogLog</h4>
+<h3 id="hyperloglog">HyperLogLog</h3>
 <blockquote>
 <p>简介</p>
 </blockquote>
@@ -1071,7 +942,7 @@ pfmerge destkey sourcekey [sourcekey...]	//合并数据
 <li>pfmerge命令合并后占用的存储空间为12K，无论合并之前数据量多少</li>
 </ul>
 <hr>
-<h4 id="geo">GEO</h4>
+<h3 id="geo">GEO</h3>
 <blockquote>
 <p>简介</p>
 </blockquote>
@@ -1087,1701 +958,580 @@ georadiusbymember key member radius m|km|ft|mi [withcoord] [withdist] [withhash]
 geohash key member [member...]		//获取指定点对应的坐标hash值
 
 </code></pre>
-<hr>
-<h2 id="redis集群">Redis集群</h2>
-<h3 id="主从复制">主从复制</h3>
-<p><a href="https://www.cnblogs.com/wade-luffy/p/9639986.html">相关文档</a></p>
-<blockquote>
-<p>简介</p>
-</blockquote>
-<p>主从复制，是指将一台Redis服务器的数据，复制到其他的Redis服务器。前者称为主节点(master/leader)，后者称为从节点(slave/follower)；数据的复制是单向的，只能由主节点到从节点。</p>
-<p>主从复制的作用主要包括：</p>
-<ol>
-<li>数据冗余：主从复制实现了数据的热备份，是持久化之外的一种数据冗余方式。</li>
-<li>故障恢复：当主节点出现问题时，可以由从节点提供服务，实现快速的故障恢复；实际上是一种服务的冗余。</li>
-<li>负载均衡：在主从复制的基础上，配合读写分离，可以由主节点提供写服务，由从节点提供读服务（即写Redis数据时应用连接主节点，读Redis数据时应用连接从节点），分担服务器负载；尤其是在写少读多的场景下，通过多个从节点分担读负载，可以大大提高Redis服务器的并发量。</li>
-<li>高可用基石：除了上述作用以外，主从复制还是哨兵和集群能够实施的基础，因此说主从复制是Redis高可用的基础。</li>
-</ol>
-<hr>
-<h4 id="工作流程">工作流程</h4>
-<p>主从复制过程大体可以分为三个阶段：</p>
-<ol>
-<li>建立连接阶段（即准备阶段）</li>
-<li>数据同步阶段</li>
-<li>命令传播阶段</li>
-</ol>
-<figure data-type="image" tabindex="2"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis.assets%5Cimage-20200304164926241.png" alt="image-20200304164926241" loading="lazy"></figure>
-<h5 id="阶段1建立连接阶段工作流程">阶段1：建立连接阶段工作流程</h5>
-<p>步骤：</p>
-<ol>
-<li>设置master的地址和端口，保存master信息</li>
-<li>建立socket连接</li>
-<li>发送ping命令（定时器任务）</li>
-<li>身份验证</li>
-<li>发送slave端口信息</li>
-</ol>
-<p>状态：</p>
-<ul>
-<li>slave：保存master的地址与端口</li>
-<li>master：保存slave的端口</li>
-</ul>
-<p>总体：之间创建了连接的socket</p>
-<figure data-type="image" tabindex="3"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis.assets%5Cimage-20200304171900063.png" alt="image-20200304171900063" loading="lazy"></figure>
-<blockquote>
-<p>主从连接方式</p>
-</blockquote>
-<p>方式一：客户端发送指令</p>
-<pre><code>slaveof &lt;masterip&gt; &lt;masterport&gt;
-
-</code></pre>
-<p>方式二：启动服务器时携带参数</p>
-<pre><code>redis-server --slaveof &lt;masterip&gt; &lt;masterport&gt;
-
-</code></pre>
-<p>方式三：服务器配置*</p>
-<pre><code>slaveof &lt;masterip&gt; &lt;masterport&gt;
-
-</code></pre>
-<p>断开连接方式：slaveof no one</p>
-<hr>
-<h5 id="阶段2数据同步阶段工作流程">阶段2：数据同步阶段工作流程</h5>
-<p>步骤：</p>
-<ol>
-<li>请求同步数据</li>
-<li>创建RDB同步数据</li>
-<li>恢复RDB同步数据</li>
-<li>请求部分同步数据</li>
-<li>恢复部分同步数据</li>
-</ol>
-<p>状态：</p>
-<ul>
-<li>slave：具有master端全部数据，包括RDB过程接收的数据</li>
-<li>master：保存slave当前数据同步的位置</li>
-</ul>
-<p>总体：之间完成了数据克隆</p>
-<figure data-type="image" tabindex="4"><img src="E:%5CTypora%5CNotes%5C%E6%95%B0%E6%8D%AE%E5%BA%93%5CRedis.assets%5Cimage-20200305152146724.png" alt="image-20200305152146724" loading="lazy"></figure>
-<blockquote>
-<p>说明</p>
-</blockquote>
-<p>master：</p>
-<ol>
-<li>如果master数据量巨大，数据同步阶段应避开流量高峰期，避免造成master阻塞，影响业务正常执行</li>
-<li>复制缓冲区大小设定不合理，会造成数据溢出。如进行全量复制周期太长，进行部分复制时发现数据已经存在丢失的情况，必须进行第二次全量复制，致使slave陷入死循环状态。</li>
-</ol>
-<pre><code>repl-backlog-size 1mb
-
-</code></pre>
-<ol start="3">
-<li>master单机内存占用主机内存的比例不应过大，建议使用50%-70%的内存，留下30%-50%的内存用于执行bgsave命令和创建复制缓冲区</li>
-</ol>
-<p>slave：</p>
-<ol>
-<li>为避免slave进行全量复制、部分复制时服务器响应阻塞或数据不同步，建议关闭此期间的对外服务</li>
-</ol>
-<pre><code>slave-serve-stale-data yes|no
-
-</code></pre>
-<ol start="2">
-<li>数据同步阶段，master发送给slave信息可以理解为master是slave的一个客户端，主动向slave发送命令</li>
-<li>多个slave同时对master请求数据同步，master发送的RDB文件增多，会对带宽造成巨大冲击，如果master带宽不足，因此数据同步需要根据业务需求，适量错峰</li>
-<li>slave过多时，建议调整拓扑结构，由一主多从结构变为树状结构，中间节点即是master，也是slave。注意使用树状结构时，由于层级深度，导致深度越高的slave与最顶层master间数据同步延迟较大，数据一致性变差，应谨慎选择</li>
-</ol>
-<h6 id="部分复制的三个核心要素">部分复制的三个核心要素</h6>
-<blockquote>
-<p>服务器的运行id</p>
-</blockquote>
-<p>概念：服务器的运行ID是每一台服务器每次运行的身份识别码，一台服务器多次运行可以生成多个运行id</p>
-<p>组成：运行id由40位字符组成，是一个随机的十六进制字符</p>
-<p>作用：运行id被用于在服务器间进行传输，识别身份</p>
-<p>实现方式：运行id在每台服务器启动时自动生成，master在首次连接slave时，会将自己的运行id发送给slave，slave保存此id，通过info Server命令，可以查看节点的runid</p>
-<blockquote>
-<p>复制缓冲区</p>
-</blockquote>
-<p>概念：复制缓冲区，又名复制积压区，是一个先进先出的队列，用于存储服务器执行的命令，每次传播命令，master都会将传播的命令记录下来，并存储在复制缓冲区中（默认大小1M）</p>
-<p>组成：偏移量、字节值</p>
-<p>作用：用于保存master收到的所有指令（仅影响数据变更的指令）</p>
-<p>数据来源：当master接收到主客户端的指令时，除了将指令执行，会将该指令存储到缓冲区中</p>
-<blockquote>
-<p>复制偏移量</p>
-</blockquote>
-<p>概念：一个数字，描述复制缓冲区中的指令字节位置</p>
-<p>分类：</p>
-<ul>
-<li>master复制偏移量：记录发送给所有slave的指令字节对应的位置（多个）</li>
-<li>slave复制偏移量：记录slave接收master发送过来的指令字节的位置（一个）</li>
-</ul>
-<p>数据来源：</p>
-<ul>
-<li>master：发送一次记录一次</li>
-<li>slave端：接收一次记录一次</li>
-</ul>
-<p>作用：信息同步，对比master与slave的差异，当slave断线后，恢复数据使用</p>
-<hr>
-<h5 id="授权访问">授权访问</h5>
-<p>master：</p>
-<pre><code>配置文件中：
-require &lt;password&gt;
-执行时：
-config set requirepass &lt;password&gt;
-config get requirepass
-</code></pre>
-<p>slave:</p>
-<pre><code>配置文件中：
-masterauth &lt;password&gt;
-启动时：
-redis-cli -a &lt;password&gt;
-执行时：
-auth &lt;password&gt;
-</code></pre>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[SpringBoot]]></title>
-        <id>https://liuyuzheng8.github.io/post/springboot/</id>
-        <link href="https://liuyuzheng8.github.io/post/springboot/">
+        <title type="html"><![CDATA[Redis基础]]></title>
+        <id>https://liuyuzheng8.github.io/post/redis-ji-chu/</id>
+        <link href="https://liuyuzheng8.github.io/post/redis-ji-chu/">
         </link>
-        <updated>2020-03-05T12:34:41.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="springboot">SpringBoot</h1>
-<h2 id="什么是-springboot">什么是 SpringBoot</h2>
-<p>SpringBoot是一个javaweb的开发框架，和SpringMVC类似，对比其他javaweb框架的好处，官方说是简化开发，约定大于配置， you can &quot;just run&quot;，能迅速的开发web应用，几行代码开发一个http接口</p>
-<p>Spring Boot 基于 Spring 开发，Spirng Boot 本身并不提供 Spring 框架的核心特性以及扩展功能，只是用于快速、敏捷地开发新一代基于 Spring 框架的应用程序。也就是说，它并不是用来替代 Spring 的解决方案，而是和 Spring 框架紧密结合用于提升 Spring 开发者体验的工具。Spring Boot 以<strong>约定大于配置的核心思想</strong>，默认帮我们进行了很多设置，多数 Spring Boot 应用只需要很少的 Spring 配置。同时它集成了大量常用的第三方库配置（例如 Redis、MongoDB、Jpa、RabbitMQ、Quartz 等等），Spring Boot 应用中这些第三方库几乎可以零配置的开箱即用，</p>
-<p>简单来说就是SpringBoot其实不是什么新的框架，它默认配置了很多框架的使用方式，就像maven整合了所有的jar包，spring boot整合了所有的框架 。</p>
-<p><strong>SpringBoot 的主要优点</strong></p>
+        <updated>2020-03-06T13:17:28.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="redis基础">Redis基础</h1>
+<h2 id="redis简介">Redis简介</h2>
+<h3 id="nosql">NoSQL</h3>
+<p>NoSQL：即Not-OnlySQL（泛指非关系型的数据库），作为关系型数据库的补充。</p>
+<p>作用：应对基于海量用户和海量数据前提下的数据处理问题。</p>
+<p>特征：</p>
 <ul>
-<li>为所有Spring开发者更快的入门</li>
-<li><strong>开箱即用</strong>，提供各种默认配置来简化项目配置</li>
-<li>内嵌式容器简化Web项目</li>
-<li>没有冗余代码生成和XML配置的要求</li>
+<li>可扩容，可伸缩</li>
+<li>大数据量下高性能</li>
+<li>灵活的数据模型</li>
+<li>高可用</li>
 </ul>
-<h2 id="第一个-springboot-程序">第一个 SpringBoot 程序</h2>
-<p>官方提供了一个快速生成 SpringBoot 的网站，但是在IDEA中有集成。</p>
-<p>https://start.spring.io/</p>
-<h3 id="步骤">步骤：</h3>
-<figure data-type="image" tabindex="1"><img src="E:%5CTypora%5CNotes%5C%E5%BE%AE%E6%9C%8D%E5%8A%A1%5CSpringBoot.assets%5Cimage-20191129092018481.png" alt="image-20191129092018481" loading="lazy"></figure>
-<figure data-type="image" tabindex="2"><img src="E:%5CTypora%5CNotes%5C%E5%BE%AE%E6%9C%8D%E5%8A%A1%5CSpringBoot.assets%5Cimage-20191129092024760.png" alt="image-20191129092024760" loading="lazy"></figure>
-<figure data-type="image" tabindex="3"><img src="E:%5CTypora%5CNotes%5C%E5%BE%AE%E6%9C%8D%E5%8A%A1%5CSpringBoot.assets%5Cimage-20191129092035266.png" alt="image-20191129092035266" loading="lazy"></figure>
-<p>创建完成后的项目结构：</p>
-<figure data-type="image" tabindex="4"><img src="E:%5CTypora%5CNotes%5C%E5%BE%AE%E6%9C%8D%E5%8A%A1%5CSpringBoot.assets%5Cimage-20191129092458783.png" alt="image-20191129092458783" loading="lazy"></figure>
-<ul>
-<li>程序的主程序类</li>
-<li>一个 application.properties 配置文件</li>
-<li>一个测试类</li>
-</ul>
-<p>**注意:**需要在与 Springboot1HelloworldApplication 同级的目录下进行包结构的建立.</p>
-<p>pom.xml 分析：</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
-    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
-    &lt;parent&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-        &lt;version&gt;2.2.1.RELEASE&lt;/version&gt;
-        &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
-    &lt;/parent&gt;
-    &lt;groupId&gt;com.squid&lt;/groupId&gt;
-    &lt;artifactId&gt;springboot-1-helloworld&lt;/artifactId&gt;
-    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
-    &lt;name&gt;springboot-1-helloworld&lt;/name&gt;
-    &lt;description&gt;My First SpringBoot Project&lt;/description&gt;
-
-    &lt;properties&gt;
-        &lt;java.version&gt;1.8&lt;/java.version&gt;
-    &lt;/properties&gt;
-
-    &lt;dependencies&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-        &lt;/dependency&gt;
-
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
-            &lt;scope&gt;test&lt;/scope&gt;
-            &lt;exclusions&gt;
-                &lt;exclusion&gt;
-                    &lt;groupId&gt;org.junit.vintage&lt;/groupId&gt;
-                    &lt;artifactId&gt;junit-vintage-engine&lt;/artifactId&gt;
-                &lt;/exclusion&gt;
-            &lt;/exclusions&gt;
-        &lt;/dependency&gt;
-    &lt;/dependencies&gt;
-
-    &lt;build&gt;
-        &lt;plugins&gt;
-            &lt;plugin&gt;
-                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
-            &lt;/plugin&gt;
-        &lt;/plugins&gt;
-    &lt;/build&gt;
-
-&lt;/project&gt;
-
-</code></pre>
-<p>如上所示，pom文件中主要分为四个部分：</p>
-<ul>
-<li>项目元数据信息：创建时候输入的Project Metadata部分，也就是Maven项目的基本元素，包括：groupId、artifactId、version、name、description等</li>
-<li>parent：继承 <code>spring-boot-starter-parent</code>的依赖管理，控制版本与打包等内容</li>
-<li>dependencies：项目具体依赖，这里包含了 <code>spring-boot-starter-web</code>用于实现HTTP接口（该依赖中包含了Spring MVC），官网对它的描述是：使用Spring MVC构建Web（包括RESTful）应用程序的入门者，使用Tomcat作为默认嵌入式容器。；<code>spring-boot-starter-test</code>用于编写单元测试的依赖包。更多功能模块的使用我们将在后面逐步展开。</li>
-<li>build：构建配置部分。默认使用了 <code>spring-boot-maven-plugin</code> ，配合 <code>spring-boot-starter-parent</code> 就可以把Spring Boot应用打包成JAR来直接运行。</li>
-</ul>
-<p>SpringBoot 所有的自动配置都是在启动的时候扫描并加载,所有的自动配置类都在 spring.factories 中,但是需要判断条件是否成立,只有导入了对应的 start ,才会拥有对应的启动器,自动装配才会生效.</p>
-<h2 id="配置文件">配置文件</h2>
-<p>将原有的 application.properties 替换为 application.yaml。</p>
-<h3 id="yaml">Yaml</h3>
-<p><em>YAML</em>是&quot;YAML Ain't a Markup Language&quot;（YAML不是一种<a href="https://baike.baidu.com/item/%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80">标记语言</a>）的<a href="https://baike.baidu.com/item/%E9%80%92%E5%BD%92%E7%BC%A9%E5%86%99">递归缩写</a></p>
-<p>&quot;Yet Another Markup Language&quot;（仍是一种<a href="https://baike.baidu.com/item/%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80">标记语言</a>）</p>
-<h4 id="yaml的标准语法">Yaml的标准语法</h4>
-<p>key：(空格)value</p>
-<pre><code class="language-yaml"># 存储普通值
-key: value
-
-# 存储对象
-student:
-	name: squid
-	age: 3
-	
-student: { name: squid,age: 3}
-
-# 存储数组
-pets:
-	- cat
-	- dog
-	- pig
-	
-pets: [cat,dog,pig]
-</code></pre>
-<h3 id="yaml向实体类注入属性值">Yaml向实体类注入属性值</h3>
-<pre><code class="language-java">//实体类
-@Component
-@ConfigurationProperties(prefix = &quot;person&quot;)
-public class Person {
-    private String name;
-    private Integer age;
-    private Boolean happy;
-    private Date birth;
-    private Map&lt;String,Object&gt; maps;
-    private List&lt;Object&gt; list;
-    private Dog dog;
-
-    public Person() {
-    }
-
-    public Person(String name, Integer age, Boolean happy, Date brith, Map&lt;String, Object&gt; maps, List&lt;Object&gt; list, Dog dog) {
-        this.name = name;
-        this.age = age;
-        this.happy = happy;
-        this.birth = brith;
-        this.maps = maps;
-        this.list = list;
-        this.dog = dog;
-    }
-
-    @Override
-    public String toString() {
-        return &quot;Person{&quot; +
-                &quot;name='&quot; + name + '\'' +
-                &quot;, age=&quot; + age +
-                &quot;, happy=&quot; + happy +
-                &quot;, brith=&quot; + birth +
-                &quot;, maps=&quot; + maps +
-                &quot;, list=&quot; + list +
-                &quot;, dog=&quot; + dog +
-                '}';
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public Boolean getHappy() {
-        return happy;
-    }
-
-    public void setHappy(Boolean happy) {
-        this.happy = happy;
-    }
-
-    public Date getBirth() {
-        return birth;
-    }
-
-    public void setBirth(Date birth) {
-        this.birth = birth;
-    }
-
-    public Map&lt;String, Object&gt; getMaps() {
-        return maps;
-    }
-
-    public void setMaps(Map&lt;String, Object&gt; maps) {
-        this.maps = maps;
-    }
-
-    public List&lt;Object&gt; getList() {
-        return list;
-    }
-
-    public void setList(List&lt;Object&gt; list) {
-        this.list = list;
-    }
-
-    public Dog getDog() {
-        return dog;
-    }
-
-    public void setDog(Dog dog) {
-        this.dog = dog;
-    }
-}
-</code></pre>
-<pre><code class="language-yaml">person:
-  name: squid
-  age: 3
-  happy: false
-  birth: 2019/11/02
-  maps: {k1: v1,k2: v2}
-  list:
-    - code
-    - music
-    - girl
-  dog:
-    name: 旺财
-    age: 3
-</code></pre>
-<h4 id="yaml-与-properties-文件注入的区别">Yaml 与 properties 文件注入的区别</h4>
-<figure data-type="image" tabindex="5"><img src="https://img2018.cnblogs.com/blog/1418974/201907/1418974-20190728164637719-1038154879.png" alt="img" loading="lazy"></figure>
-<ul>
-<li>@ConfigurationProperties 只需要写一次即可 ， @Value则需要每个字段都添加</li>
-<li>松散绑定：这个什么意思呢? 比如我的yml中写的last-name，这个和lastName是一样的， - 后面跟着的字母默认是大写的。这就是松散绑定</li>
-<li>JSR303数据校验 ， 这个就是我们可以在字段是增加一层过滤器验证 ， 可以保证数据的合法性</li>
-<li>复杂类型封装，yml中可以封装对象 ， 使用@Value就不支持</li>
-</ul>
-<h4 id="jsr303-数据校验">JSR303 数据校验</h4>
-<p>SpringBoot 中可以用 @Validated 来校验数据，如果数据异常则会统一抛出异常，方便异常中心统一处理。</p>
-<p>例如：</p>
-<pre><code class="language-java">@Component
-@ConfigurationProperties(prefix = &quot;person&quot;)
-@Validated
-public class Person {
-    @Email(message = &quot;邮箱错误&quot;)
-    private String name;
-}
-</code></pre>
-<p>当添加了该注解后，如果数据不为注解所需格式，则会在编译时进行报错。</p>
-<h5 id="bean-validation-中内置的-constraint">Bean Validation 中内置的 constraint</h5>
-<figure data-type="image" tabindex="6"><img src="https://upload-images.jianshu.io/upload_images/3145530-8ae74d19e6c65b4c?imageMogr2/auto-orient/strip%7CimageView2/2/w/654/format/webp" alt="img" loading="lazy"></figure>
-<h5 id="hibernate-validator-附加的-constraint"><strong>Hibernate Validator 附加的 constraint</strong></h5>
-<figure data-type="image" tabindex="7"><img src="https://upload-images.jianshu.io/upload_images/3145530-10035c6af8e90a7c?imageMogr2/auto-orient/strip%7CimageView2/2/w/432/format/webp" alt="img" loading="lazy"></figure>
-<h3 id="多环境切换">多环境切换</h3>
-<p>profile是Spring对不同环境提供不同配置功能的支持，可以通过激活不同的环境版本，实现快速切换环境 。</p>
-<h4 id="方式一编写多个-properties-配置文件">方式一：编写多个 properties 配置文件</h4>
-<p>我们在主配置文件编写的时候，文件名可以是 application-{profile}.properties/yml ， 用来指定多个环境版本；</p>
-<p>例如：application-test.properties 代表测试环境配置  application-dev.properties 代表开发环境配置</p>
-<p>但是Springboot并不会直接启动这些配置文件，它默认使用application.properties主配置文件；</p>
-<p>我们需要通过一个配置来选择需要激活的环境；</p>
-<pre><code class="language-properties">#比如在配置文件中指定使用dev环境，我们可以通过设置不同的端口号进行测试；
-#我们启动SpringBoot，就可以看到已经切换到dev下的配置了；
-spring.profiles.active=dev
-</code></pre>
-<h4 id="方式二yaml-的多文档块">方式二：Yaml 的多文档块</h4>
-<pre><code class="language-yaml"># --- 代表一个文档块
-
-server:
-  port: 8081
-#选择要激活那个环境块
-spring:
-  profiles:
-    active: dev
-
----
-server:
-  port: 8083
-#配置环境的名称
-spring:
-  profiles: dev
-
-
----
-
-server:
-  port: 8084
-spring:
-  profiles: prod  #配置环境的名称
-</code></pre>
-<p><strong>注意：如果yml和properties同时都配置了端口，并且没有激活其他环境 ， 默认会使用properties配置文件的！</strong></p>
-<h3 id="配置文件加载位置">配置文件加载位置</h3>
-<p><strong>Springboot 启动会扫描以下位置的 application.properties 或者 application.yaml 文件作为 Springboot 的默认配置文件</strong></p>
-<pre><code>优先级1：项目路径下的config文件夹配置文件
-优先级2：项目路径下配置文件
-优先级3：资源路径下的config文件夹配置文件
-优先级4：资源路径下配置文件
-</code></pre>
-<p>优先级由高到底，高优先级的配置会覆盖低优先级的配置 ;</p>
-<p><strong>SpringBoot会从这四个位置全部加载主配置文件；*<em>互补配置*</em>；</strong></p>
-<h3 id="自动配置原理分析">自动配置原理分析</h3>
+<hr>
+<h3 id="redis概念">Redis概念</h3>
+<p><strong>Redis</strong>是用C语言开发的一个开源的高性能键值对（key-value）数据库。</p>
+<p>特征：</p>
 <ol>
-<li>
-<p>SpringBoot启动的时候加载主配置类，开启了自动配置功能 <strong>@EnableAutoConfiguration</strong></p>
-</li>
-<li>
-<p><strong>@EnableAutoConfiguration</strong>  的作用：</p>
-<ul>
-<li>利用 <strong>@EnableAutoConfiguration</strong> 可以为容器中导入一些组件。</li>
-<li>进入 <strong>@EnableAutoConfiguration</strong>  中，有一个 selectImports(AnnotationMetadata annotationMetadata) 方法，返回了一个数组，而数组中的值来自于 AutoConfigurationEntry ，通过调用 this.getAutoConfigurationEntry(autoConfigurationMetadata, annotationMetadata) 能够获取 AutoConfigurationEntry 实例。</li>
-<li>进入 getAutoConfigurationEntry 方法，其中有一个值为 List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);</li>
-<li>进入 getCandidateConfigurations 方法，其中调用了SpringFactoriesLoader  的 loadFactoryNames 方法， 用于获取 configurations 的集合。</li>
-<li>进入 loadFactoryNames 方法，发现它又调用了 loadSpringFactories 方法。</li>
-<li>进入 loadSpringFactories 方法，发现它获取了一个定义变量名为 FACTORIES_RESOURCE_LOCATION 的资源文件，而资源文件内容指向 &quot;META-INF/spring.factories&quot;。 而后将读取到的资源封装在 url 中， 通过 while 循环，把这些 url 文件封装在 Properties 文件中，最后返回封装好的结果。</li>
-<li><strong>总结：</strong>@EnableAutoConfiguration 作用就是从 classpath 中搜寻所有的 META-INF/spring.factories 配置文件，并将在 autoconfigure 的 jar 包下的  META-INF/spring.factories 中 EnableAutoConfiguration 中的所有对应配置项通过反射加载到IoC容器中。如果这些配置类要生效需要在 pom.xml 中引用。</li>
-</ul>
-</li>
-<li>
-<p>每一个自动配置类都可以进行自动配置。</p>
-<ul>
-<li>以 **HttpEncodingAutoConfiguration（Http编码自动配置）**为例 ：</li>
-</ul>
-<pre><code class="language-java">@Configuration //表示这是一个配置类，以前编写的配置文件一样，也可以给容器中添加组件
-//启动指定类的ConfigurationProperties功能；
-//进入这个HttpProperties查看，将配置文件中对应的值和HttpProperties绑定起来；
-//并把HttpProperties加入到ioc容器中
-@EnableConfigurationProperties({HttpProperties.class}) 
-
-//Spring底层@Conditional注解
-//根据不同的条件判断，如果满足指定的条件，整个配置类里面的配置就会生效；
-//这里的意思就是判断当前应用是否是web应用，如果是，当前配置类生效
-@ConditionalOnWebApplication(
-    type = Type.SERVLET
-)
-
-//判断当前项目有没有这个类CharacterEncodingFilter；SpringMVC中进行乱码解决的过滤器；
-@ConditionalOnClass({CharacterEncodingFilter.class})
-
-//判断配置文件中是否存在某个配置：spring.http.encoding.enabled；
-//如果不存在，判断也是成立的
-//即使我们配置文件中不配置pring.http.encoding.enabled=true，也是默认生效的；
-@ConditionalOnProperty(
-    prefix = &quot;spring.http.encoding&quot;,
-    value = {&quot;enabled&quot;},
-    matchIfMissing = true
-)
-public class HttpEncodingAutoConfiguration {
-
-    //他已经和SpringBoot的配置文件映射了
-    private final Encoding properties;
-
-    //只有一个有参构造器的情况下，参数的值就会从容器中拿
-    public HttpEncodingAutoConfiguration(HttpProperties properties) {
-        this.properties = properties.getEncoding();
-    }
-
-    //给容器中添加一个组件，这个组件的某些值需要从properties中获取
-    @Bean
-    @ConditionalOnMissingBean //判断容器没有这个组件？
-    public CharacterEncodingFilter characterEncodingFilter() {
-        CharacterEncodingFilter filter = new OrderedCharacterEncodingFilter();
-        filter.setEncoding(this.properties.getCharset().name());
-        filter.setForceRequestEncoding(this.properties.shouldForce(org.springframework.boot.autoconfigure.http.HttpProperties.Encoding.Type.REQUEST));
-        filter.setForceResponseEncoding(this.properties.shouldForce(org.springframework.boot.autoconfigure.http.HttpProperties.Encoding.Type.RESPONSE));
-        return filter;
-    }
-    ......
-</code></pre>
-<p>即：使用 SpringBoot 底层的 Condiction 注解，根据当前不同的条件进行判断，并决定这个配置类是否生效。</p>
-<ul>
-<li>@EnableConfigurationProperties 中的属性指向的 xxxProperties类都是封装者；</li>
-</ul>
-<pre><code class="language-java">@ConfigurationProperties(
-    prefix = &quot;spring.http&quot;
-) //从配置文件中获取指定的值和bean的属性进行绑定
-public class HttpProperties {
-    private boolean logRequestDetails;
-    private final HttpProperties.Encoding encoding = new HttpProperties.Encoding();
-
-    public HttpProperties() {
-    }
-
-    public boolean isLogRequestDetails() {
-        return this.logRequestDetails;
-    }
-
-    public void setLogRequestDetails(boolean logRequestDetails) {
-        this.logRequestDetails = logRequestDetails;
-    }
-
-    public HttpProperties.Encoding getEncoding() {
-        return this.encoding;
-    }
-
-    public static class Encoding {
-        public static final Charset DEFAULT_CHARSET;
-        private Charset charset;
-        private Boolean force;
-        private Boolean forceRequest;
-        private Boolean forceResponse;
-        private Map&lt;Locale, Charset&gt; mapping;
-        
-        ......
-    }
-}
-</code></pre>
-</li>
+<li>数据间没有必然的关联关系</li>
+<li>内部采用<strong>单线程</strong>机制进行工作</li>
+<li>高性能</li>
+<li>多数据类型支持</li>
+<li>持久化支持</li>
 </ol>
-<h5 id="总结"><strong>总结：</strong></h5>
-<p>(1) SpringBoot 在启动时，会加载大量的自动配置类。</p>
-<p>(2) 当我们在 pom.xml 中进行依赖后，便会使自动装配的相应类生效。</p>
-<p>(3) 当给容器中自动配置类添加组件的时候，会从相应的 properties 类中获取默认属性。我们可以通过配置文件对这些属性进行修改。</p>
-<h5 id="conditional">@Conditional</h5>
-<p><strong>@Conditional派生注解（Spring注解版原生的@Conditional作用）</strong></p>
-<p>作用：必须是@Conditional指定的条件成立，才给容器中添加组件，配置配里面的所有内容才生效；</p>
-<figure data-type="image" tabindex="8"><img src="https://img2018.cnblogs.com/blog/1418974/201907/1418974-20190729005838066-64765389.png" alt="img" loading="lazy"></figure>
-<p><strong>所以，加载的配置类不一定能够生效，可以在配置文件中使用 debug = ture，让控制台打印相关信息，其中：</strong></p>
-<p>Positive matches:（自动配置类启用的：正匹配）</p>
-<p>Negative matches:（没有启动，没有匹配成功的自动配置类：负匹配）</p>
-<p>Unconditional classes: （没有条件的类）</p>
-<h2 id="springboot-web开发">SpringBoot Web开发</h2>
-<h3 id="静态资源映射规则">静态资源映射规则</h3>
+<hr>
+<h2 id="redis数据">Redis数据</h2>
+<h3 id="redis数据存储格式">Redis数据存储格式</h3>
+<p>Redis自身的是一个Map，所有的数据以键值对的方式存储。</p>
+<blockquote>
+<p>key的设置约定</p>
+</blockquote>
+<p>表名：主键名：主键值：字段名</p>
+<hr>
+<h3 id="数据类型">数据类型</h3>
+<blockquote>
+<p>string类型</p>
+</blockquote>
+<ul>
+<li>存储的数据：单个数据，最简单的数据存储类型，也是最常用的数据存储类型</li>
+<li>存储数据的格式：一个存储空间保存一个数据</li>
+<li>存储内容：通常使用字符串，如果字符串以整数的形式是展示，可以作为数字操作使用</li>
+</ul>
+<blockquote>
+<p>hash类型</p>
+</blockquote>
+<ul>
+<li>存储需求：对一系列存储的数据进行编组，方便管理，典型应用存储对象信息</li>
+<li>需要的存储结构：一个存储空间保存多个键值对数据</li>
+<li>hash：底层使用哈希表结构实现数据存储</li>
+</ul>
+<blockquote>
+<p>list类型</p>
+</blockquote>
+<ul>
+<li>存储需求：存储多个数据，并对数据进入存储空间的顺序进行区分</li>
+<li>需要的存储结构：一个存储空间保存多个数据，且通过数据可以体现进入顺序</li>
+<li>list：保存多个数据，底层使用双向链表存储结构实现</li>
+</ul>
+<blockquote>
+<p>set类型</p>
+</blockquote>
+<ul>
+<li>存储需求：存储大量的数据，在查询方面提供跟高的效率</li>
+<li>需要的存储结构：能够保存大量的数据，高效的内部存储机制，便于查询</li>
+<li>set：与hash的存储结构完全相同，将值存储于hash的key中，hash的value中存储nil，并且值不允许重复</li>
+</ul>
+<blockquote>
+<p>sorted_set类型</p>
+</blockquote>
+<ul>
+<li>存储需求：数据排序有利于数据的有效展示，需要提供一种可以根据自身特征进行排序的方式</li>
+<li>需要的存储结构：新的存储模型，可以保存可排序的数据</li>
+<li>sorted_set：在set的存储结构基础上添加可排序字段</li>
+</ul>
+<hr>
+<h2 id="redis的基本操作">Redis的基本操作</h2>
+<h3 id="string类型">String类型</h3>
+<blockquote>
+<p>信息添加</p>
+</blockquote>
 <ul>
 <li>
-<p>SpringMVC 的 web 配置都在 WebMvcAutoConfiguration 中进行配置。</p>
+<p>功能：设置 key value</p>
 </li>
 <li>
-<p>进入 WebMvcAutoConfiguration 的 WebMvcAutoConfigurationAdapter 中，可以看到其中的 addResourceHandlers 方法如下：</p>
-<pre><code class="language-java">public void addResourceHandlers(ResourceHandlerRegistry registry) {
-     if (!this.resourceProperties.isAddMappings()) {
-        logger.debug(&quot;Default resource handling disabled&quot;);
-     } else {
-     Duration cachePeriod = this.resourceProperties.getCache().getPeriod();
-     CacheControl cacheControl = this.resourceProperties.getCache().getCachecontrol().toHttpCacheControl();
-      if (!registry.hasMappingForPattern(&quot;/webjars/**&quot;)) {
-                    this.customizeResourceHandlerRegistration(registry.addResourceHandler(new String[]{&quot;/webjars/**&quot;}).addResourceLocations(new String[]{&quot;classpath:/META-INF/resources/webjars/&quot;}).setCachePeriod(this.getSeconds(cachePeriod)).setCacheControl(cacheControl));
-                }
-
-      String staticPathPattern = this.mvcProperties.getStaticPathPattern();
-      if (!registry.hasMappingForPattern(staticPathPattern)) {
-                    this.customizeResourceHandlerRegistration(registry.addResourceHandler(new String[]{staticPathPattern}).addResourceLocations(getResourceLocations(this.resourceProperties.getStaticLocations())).setCachePeriod(this.getSeconds(cachePeriod)).setCacheControl(cacheControl));
-                }
-
-            }
-        }
-</code></pre>
-</li>
-<li>
-<p>可知，一共有三种使用静态资源的方法</p>
+<p>命令</p>
 </li>
 </ul>
-<ol>
-<li>
-<p>使用 webjars 方式引入静态资源。</p>
-<p>网站：<a href="http://www.baidu.com/link?url=mIlNsV-6IxBMBhkb3lsHrSKJ7NkoQ2cZ5mFYAan6hOOApPrarTnv7O78tltep771">https://www.<strong>webjars</strong>.org/</a></p>
-</li>
-<li>
-<p>将静态资源放置在默认路径下。</p>
-<pre><code>&quot;classpath:/META-INF/resources/&quot;, 
-&quot;classpath:/resources/&quot;,
- &quot;classpath:/static/&quot;, 
-&quot;classpath:/public/&quot;,
-&quot;/&quot; ：当前项目的根目录
+<pre><code>set key value
 </code></pre>
-</li>
-<li>
-<p>通过配置文件自定义路径</p>
-</li>
-</ol>
-<h3 id="模板引擎">模板引擎</h3>
-<p>需要使用模板引擎，只需要在 pom.xml 中导入 themeleaf 的依赖，maven 会自动下载 jar 包。</p>
-<pre><code class="language-xml">        &lt;!--thymeleaf模板--&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.thymeleaf&lt;/groupId&gt;
-            &lt;artifactId&gt;thymeleaf-spring5&lt;/artifactId&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.thymeleaf.extras&lt;/groupId&gt;
-            &lt;artifactId&gt;thymeleaf-extras-java8time&lt;/artifactId&gt;
-        &lt;/dependency&gt;
-
-</code></pre>
-<p>thymeleaf 的默认存放模板页面路径在  src/main/resources/templates  或者  src/main/view/templates 下。</p>
-<h4 id="thymeleaf-语法">Thymeleaf 语法</h4>
-<p>Thymeleaf 官网：https://www.thymeleaf.org/</p>
-<p>在 Controller 中进行数据存放。</p>
-<pre><code class="language-java">    @RequestMapping(&quot;/success&quot;)
-    public String success(Model model){
-        //存入数据
-        model.addAttribute(&quot;msg&quot;,&quot;Hello,Thymeleaf&quot;);
-        //classpath:/templates/success.html
-        return &quot;success&quot;;
-    }
-</code></pre>
-<p>在编写前端页面时，如果需要使用 Thymeleaf ， 需要在html文件中导入命名空间的约束。</p>
-<pre><code class="language-html"> xmlns:th=&quot;http://www.thymeleaf.org&quot;
-</code></pre>
-<p>在 html 页面中取出数据。</p>
-<pre><code class="language-html">&lt;body&gt;
-&lt;h1&gt;Success&lt;/h1&gt;
-&lt;!--th:text就是将div中的内容设置为它指定的值，和之前学习的Vue一样--&gt;
-&lt;div th:text=&quot;${msg}&quot;&gt;&lt;/div&gt;
-&lt;/body&gt;
-</code></pre>
-<h5 id="使用-thattr-来替换-html-中原生的属性值">使用 th:attr 来替换 Html 中原生的属性值。</h5>
-<figure data-type="image" tabindex="9"><img src="https://img2018.cnblogs.com/blog/1418974/201908/1418974-20190807235829953-1197701508.png" alt="img" loading="lazy"></figure>
-<h5 id="模板布局">模板布局</h5>
-<ol>
-<li>
-<p>通过 <code>th:fragment</code> 将页面的一部分引用为模板。如：<code>th:fragment=&quot;topbar&quot;</code></p>
-</li>
-<li>
-<p>通过 <code>th:insert/th:replace</code> 将模板引入。如：<code>th:replace=&quot;~{commons/commons::topbar}</code></p>
-</li>
-<li>
-<p>在引入模板时可以携带参数。如：<code>th:replace=&quot;~{commons/commons::sidebar(active='list.html')}&quot;</code></p>
-</li>
-<li>
-<p>模板可以通过参数进行判断。如：<code>th:class=&quot;${active=='main.html'?'nav-link active':'nav-link'}&quot;</code></p>
-</li>
-</ol>
-<h3 id="spring-mvc-自动配置">Spring MVC 自动配置</h3>
-<h5 id="contentnegotiatingviewresolver">ContentNegotiatingViewResolver</h5>
-<p>SpringBoot 帮我们的 SpringMVC 自动配置了视图解析器： 即根据方法的返回值取得视图对象（View），然后由视图对象决定如何渲染（转发，重定向）。</p>
-<p>从  WebMvcAutoConfiguration  中搜索  ContentNegotiatingViewResolver ，可以找到如下方法：</p>
-<pre><code class="language-java">@Bean //我们在这里确实看到已经给容器中注册了一个bean
-@ConditionalOnBean({ViewResolver.class})
-@ConditionalOnMissingBean(
-     name = {&quot;viewResolver&quot;},
-     value = {ContentNegotiatingViewResolver.class}
-)
-public ContentNegotiatingViewResolver viewResolver(BeanFactory beanFactory) {
-     ContentNegotiatingViewResolver resolver = new ContentNegotiatingViewResolver();
-     resolver.setContentNegotiationManager((ContentNegotiationManager)beanFactory.getBean(ContentNegotiationManager.class));
-     resolver.setOrder(-2147483648);
-     return resolver;
-}
-
-</code></pre>
-<p>进入 ContentNegotiatingViewResolver 类中，可以在其中找到一个 resolveViewName 方法:</p>
-<pre><code class="language-java">	@Override
-	@Nullable
-	public View resolveViewName(String viewName, Locale locale) throws Exception {
-		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
-		Assert.state(attrs instanceof ServletRequestAttributes, &quot;No current ServletRequestAttributes&quot;);
-		List&lt;MediaType&gt; requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());
-		if (requestedMediaTypes != null) {
-            //获取候选的视图对象
-			List&lt;View&gt; candidateViews = getCandidateViews(viewName, locale, requestedMediaTypes);
-            //选择一个最适合的视图对象，然后把这个对象返回
-			View bestView = getBestView(candidateViews, requestedMediaTypes, attrs);
-			if (bestView != null) {
-				return bestView;
-			}
-		}
-
-
-</code></pre>
-<p>在 getCandidateViews 中，通过循环遍历获取所有的视图解析器并解析。</p>
-<p><strong>总结：</strong> ContentNegotiatingViewResolver 这个视图解析器就是用来组合所有的视图解析器的</p>
-<h5 id="转换器和格式化器">转换器和格式化器</h5>
-<p>我们可以通过在配置文件中配置日期格式化的规则达到对日期格式的限定的效果：</p>
-<pre><code class="language-xml">spring.mvc.data-format = 
-
-</code></pre>
-<h5 id="扩展使用-springmvc">扩展使用 SpringMVC</h5>
-<p>官方文档：</p>
-<pre><code class="language-word">If you want to keep Spring Boot MVC features and you want to add additional MVC configuration (interceptors, formatters, view controllers, and other features), you can add your own @Configuration class of type WebMvcConfigurer but without @EnableWebMvc. If you wish to provide custom instances of RequestMappingHandlerMapping, RequestMappingHandlerAdapter, or ExceptionHandlerExceptionResolver, you can declare a WebMvcRegistrationsAdapter instance to provide such components.
-
-</code></pre>
-<p>根据文档说明，我们需要编写一个 @Configuration 的注解类， 并且需要继承自 WebMvcConfigurer ，同时不能标注  @EnableWebMvc 。</p>
-<p>注：@EnableWebMvc 会引入一个 DelegatingWebMvcConfiguration 类，他的父类为  WebMvcConfigurationSupport  ，而 Webmvc 自动配置类上有一个  @ConditionalOnMissingBean({WebMvcConfigurationSupport.class}) 注解，这个注解的意思是，当没有引入指定类时才可生效。</p>
-<p>测试：</p>
-<pre><code class="language-java">//应为类型要求为WebMvcConfigurer，所以我们实现其接口
-//可以使用自定义类扩展MVC的功能
-@Configuration
-public class MyMvcConfig implements WebMvcConfigurer {
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        //浏览器发送/test ， 就会跳转到success页面；
-        registry.addViewController(&quot;/test&quot;).setViewName(&quot;success&quot;);
-    }
-}
-
-</code></pre>
-<p>所以，当需要扩展 SpringMVC 时，官方推荐使用这种方式，既可以保留原有的自动配置，又可以使用自定义扩展的配置。</p>
-<p><strong>原理分析：</strong></p>
-<ol>
-<li>WebMvcAutoConfiguration 是 SpringMVC的自动配置类，其中有一个名为WebMvcAutoConfigurationAdapter 的类。</li>
-<li>这个类上的注解，在做其他自动配置时会导入：  @Import({WebMvcAutoConfiguration.EnableWebMvcConfiguration.class})</li>
-<li>进入  EnableWebMvcConfiguration 中，继承了一个名为  DelegatingWebMvcConfiguration 的父类，这个父类中存在：</li>
-</ol>
-<pre><code class="language-java">    private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
-
-　　 //从容器中获取所有的webmvcConfigurer
-    @Autowired(required = false)
-    public void setConfigurers(List&lt;WebMvcConfigurer&gt; configurers) {
-        if (!CollectionUtils.isEmpty(configurers)) {
-            this.configurers.addWebMvcConfigurers(configurers);
-        }
-
-    }
-
-</code></pre>
-<p>而我们设置的 viewController 中，使用了一个方法：</p>
-<pre><code class="language-java">this.configurers.addViewControllers(registry);
-
-</code></pre>
-<p>这个方法的源代码为：</p>
-<pre><code class="language-java">    public void addViewControllers(ViewControllerRegistry registry) {
-        Iterator var2 = this.delegates.iterator();
-
-        while(var2.hasNext()) {
-            //将所有的WebMvcConfigurer相关配置来一起调用！包括我们自己配置的和Spring给我们配置的
-            WebMvcConfigurer delegate = (WebMvcConfigurer)var2.next();
-            delegate.addViewControllers(registry);
-        }
-    }
-
-</code></pre>
-<ol start="5">
-<li>所以，所有的 WebMvcConfiguration 都会被使用，包括我们自定义的。</li>
-</ol>
-<h5 id="国际化">国际化</h5>
-<ol>
-<li>在 resources 目录下新建 i18n 文件，其中存放国际化使用的 properties 文件。</li>
-</ol>
-<pre><code class="language-properties"># login.properties
-login.btn=登录
-login.password=密码
-login.remember=记住我
-login.tip=请登录
-login.username=用户名
-
-</code></pre>
-<ol start="2">
-<li>在前端页面使用按钮进行切换(#{})，并且编写自定义类继承自 LocaleResolver</li>
-</ol>
-<pre><code class="language-html">&lt;a class=&quot;btn btn-sm&quot; th:href=&quot;@{/index.html(lang='zh_CN')}&quot;&gt;中文&lt;/a&gt;
-&lt;a class=&quot;btn btn-sm&quot; th:href=&quot;@{/index.html(lang='en_US')}&quot;&gt;English&lt;/a&gt;
-
-</code></pre>
-<pre><code class="language-java">public class MyLocaleResolver implements LocaleResolver {
-    @Override
-    public Locale resolveLocale(HttpServletRequest request) {
-        //获取请求中的语言参数
-        String lang = request.getParameter(&quot;lang&quot;);
-        Locale locale = Locale.getDefault();//如果没有携带参数则使用默认地区解析器
-        //如果请求中携带了国际化参数
-        if (!StringUtils.isEmpty(lang)){
-            //zh_CN
-            String[] split = lang.split(&quot;_&quot;);
-            locale = new Locale(split[0],split[1]);
-        }
-        return locale;
-    }
-
-    @Override
-    public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
-
-    }
-}
-
-</code></pre>
-<ol start="3">
-<li>将编写的自定义类配置到 spring 容器中(@Bean)。</li>
-</ol>
-<h5 id="拦截器">拦截器</h5>
-<ol>
-<li>编写自定义类继承自 <code>HandlerInterceptor</code>;</li>
-<li>重写不同方法，以设置拦截内容；</li>
-<li>通过 <code>addInterceptors</code> 方法进行注入；</li>
-</ol>
-<pre><code class="language-java">//自定义拦截器
-public class LoginHandlerInterceptor implements HandlerInterceptor {
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        //登录之后应当存在用户session
-        Object loginUser = request.getSession().getAttribute(&quot;loginUser&quot;);
-
-        if(loginUser == null){
-            request.setAttribute(&quot;msg&quot;,&quot;没有权限，请登录&quot;);
-            request.getRequestDispatcher(&quot;/index.html&quot;).forward(request,response);
-            return false;
-        }else {
-            return true;
-        }
-    }
-}
-
-</code></pre>
-<pre><code class="language-java">//注入
-@Override
-public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new 	LoginHandlerInterceptor()).addPathPatterns(&quot;/**&quot;)
-    .excludePathPatterns(&quot;/index.html&quot;,&quot;/&quot;,&quot;/user/login&quot;,&quot;/css/**&quot;,
-                        &quot;/js/**&quot;,&quot;img/**&quot;);
-}
-
-</code></pre>
-<h2 id="数据访问">数据访问</h2>
-<p>对于数据访问层，无论是 SQL(关系型数据库) 还是 NOSQL(非关系型数据库)，Spring Boot 底层都是采用 Spring Data 的方式进行统一处理。</p>
-<p>Spring Boot 底层都是采用 Spring Data 的方式进行统一处理各种数据库，Spring Data 也是 Spring 中与 Spring Boot、Spring Cloud 等齐名的知名项目。</p>
-<p>Sping Data 官网：https://spring.io/projects/spring-data</p>
-<p>数据库相关的启动器 ： 可以参考官方文档：<a href="https://docs.spring.io/spring-boot/docs/2.0.4.RELEASE/reference/htmlsingle/#using-boot-starter">https://docs.spring.io/spring-boot/docs/2.1.7.RELEASE/reference/htmlsingle/#using-boot-starter</a></p>
-<h3 id="jdbc">JDBC</h3>
-<ol>
-<li>在 pom.xml 中添加依赖</li>
-</ol>
-<pre><code class="language-xml">        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;mysql&lt;/groupId&gt;
-            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-            &lt;scope&gt;runtime&lt;/scope&gt;
-        &lt;/dependency&gt;
-
-</code></pre>
-<ol start="2">
-<li>在配置文件中进行配置</li>
-</ol>
-<pre><code class="language-yml"># application.yml
-spring:
-  datasource:
-    username: root
-    password: 123456
-    url: jdbc:mysql://localhost:3306/mybatis?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-</code></pre>
-<ol start="3">
-<li>使用( SpringBoot 自动配置)</li>
-</ol>
-<p>默认数据源为 hikari</p>
-<pre><code class="language-java">@RestController
-public class JDBCController {
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @GetMapping(&quot;/userList&quot;)
-    public List&lt;Map&lt;String,Object&gt;&gt; userList(){
-        String sql = &quot;select * from user&quot;;
-        List&lt;Map&lt;String, Object&gt;&gt; maps = jdbcTemplate.queryForList(sql);
-        return maps;
-    }
-
-    @GetMapping(&quot;/updateUser/{id}&quot;)
-    public String updateUser(@PathVariable(&quot;id&quot;) int id){
-        String sql = &quot;update mybatis.user set name=?,pwd=? where id = &quot; + id;
-        //封装
-        Object[] objects = new Object[2];
-        objects[0] = &quot;小明2&quot;;
-        objects[1] = &quot;zzzzzzzzz&quot;;
-        jdbcTemplate.update(sql,objects);
-        return &quot;updateUser-ok&quot;;
-
-    }
-
-    @GetMapping(&quot;/deleteUser/{id}&quot;)
-    public String deleteUser(@PathVariable(&quot;id&quot;) int id){
-        String sql = &quot;delete from mybatis.user where id = ?&quot;;
-        jdbcTemplate.update(sql,id);
-        return &quot;deleteUser-ok&quot;;
-    }
-}
-
-
-</code></pre>
-<p><strong>总结：</strong></p>
-<p>1、有了数据源(com.zaxxer.hikari.HikariDataSource)，然后可以拿到数据库连接(java.sql.Connection)，有了连接，就可以使用连接和原生的 JDBC 语句来操作数据库</p>
-<p>2、即使不使用第三方第数据库操作框架，如 MyBatis等，Spring 本身也对原生的JDBC 做了轻量级的封装，即 org.springframework.jdbc.core.JdbcTemplate。</p>
-<p>3、数据库操作的所有 CRUD 方法都在 JdbcTemplate 中。</p>
-<p>4、Spring Boot 不仅提供了默认的数据源，同时默认已经配置好了 JdbcTemplate 放在了容器中，程序员只需自己注入即可使用</p>
-<p>5、JdbcTemplate 的自动配置原理是依赖 org.springframework.boot.autoconfigure.jdbc 包下的 org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration 类</p>
-<p><strong>JdbcTemplate主要提供以下几类方法：</strong></p>
+<blockquote>
+<p>信息查询</p>
+</blockquote>
 <ul>
-<li>execute方法：可以用于执行任何SQL语句，一般用于执行DDL语句；</li>
-<li>update方法及batchUpdate方法：update方法用于执行新增、修改、删除等语句；batchUpdate方法用于执行批处理相关语句；</li>
-<li>query方法及queryForXXX方法：用于执行查询相关语句；</li>
-<li>call方法：用于执行存储过程、函数相关语句。</li>
-</ul>
-<h3 id="druid">Druid</h3>
-<p><strong>DRUID 简介</strong></p>
-<p>Druid 是阿里巴巴开源平台上一个数据库连接池实现，结合了 C3P0、DBCP、PROXOOL 等 DB 池的优点，同时加入了日志监控。</p>
-<p>Druid 可以很好的监控 DB 池连接和 SQL 的执行情况，天生就是针对监控而生的 DB 连接池。</p>
-<p>Spring Boot 2.0 以上默认使用 Hikari 数据源，可以说 Hikari 与 Driud 都是当前 Java Web 上最优秀的数据源，我们来重点介绍 Spring Boot 如何集成 Druid 数据源，如何实现数据库监控。</p>
-<p><strong>Druid 使用</strong></p>
-<ol>
-<li>引入数据源</li>
-</ol>
-<pre><code class="language-xml">&lt;!-- 在 pom.xml 中添加 Druid 依赖--&gt;
-&lt;!-- https://mvnrepository.com/artifact/com.alibaba/druid --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
-            &lt;artifactId&gt;druid&lt;/artifactId&gt;
-            &lt;version&gt;1.1.21&lt;/version&gt;
-        &lt;/dependency&gt;
-
-</code></pre>
-<ol start="2">
-<li>在 application.yml 文件中设置配置项</li>
-</ol>
-<pre><code class="language-yml">spring:
-  datasource:
-    username: root
-    password: 123456
-    url: jdbc:mysql://localhost:3306/mybatis?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.alibaba.druid.pool.DruidDataSource
-
-    #Spring Boot 默认是不注入这些属性值的，需要自己绑定
-    #druid 数据源专有配置
-    initialSize: 5
-    minIdle: 5
-    maxActive: 20
-    maxWait: 60000
-    timeBetweenEvictionRunsMillis: 60000
-    minEvictableIdleTimeMillis: 300000
-    validationQuery: SELECT 1 FROM DUAL
-    testWhileIdle: true
-    testOnBorrow: false
-    testOnReturn: false
-    poolPreparedStatements: true
-    #配置监控统计拦截的filters，stat:监控统计、log4j：日志记录、wall：防御sql注入
-    #如果允许时报错  java.lang.ClassNotFoundException: org.apache.log4j.Priority
-    #则导入 log4j 依赖即可，Maven 地址： https://mvnrepository.com/artifact/log4j/log4j
-    filters: stat,wall,log4j
-    maxPoolPreparedStatementPerConnectionSize: 20
-    useGlobalDataSourceStat: true
-    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
-
-</code></pre>
-<p>注意：需要导入 log4j 的依赖。</p>
-<ol start="3">
-<li>编写配置类。</li>
-</ol>
-<pre><code class="language-java">@Configuration
-public class DruidConfig {
-    /*
-       将自定义的 Druid数据源添加到容器中，不再让 Spring Boot 自动创建
-       绑定全局配置文件中的 druid 数据源属性到 com.alibaba.druid.pool.DruidDataSource从而让它们生效
-       @ConfigurationProperties(prefix = &quot;spring.datasource&quot;)：作用就是将 全局配置文件中
-       前缀为 spring.datasource的属性值注入到 com.alibaba.druid.pool.DruidDataSource 的同名参数中
-     */
-    @ConfigurationProperties(prefix = &quot;spring.datasource&quot;)
-    @Bean
-    public DataSource druidDataSource() {
-        return new DruidDataSource();
-    }
-
-    //配置 Druid 监控管理后台的Servlet；
-    //内置 Servlet 容器时没有web.xml文件，所以使用 SpringBoot 的注册 Servlet 方式
-    @Bean
-    public ServletRegistrationBean statViewServlet(){
-        ServletRegistrationBean&lt;StatViewServlet&gt; bean  = new ServletRegistrationBean&lt;&gt;(new StatViewServlet());
-
-        //后台需要有人登录，账号密码配置
-        HashMap&lt;String ,String&gt; initParameters = new HashMap&lt;&gt;();
-
-        //增加配置
-        initParameters.put(&quot;loginUsername&quot;,&quot;admin&quot;);
-        initParameters.put(&quot;loginPassword&quot;,&quot;123456&quot;);
-
-        initParameters.put(&quot;allow&quot;,&quot;&quot;);
-
-        bean.setInitParameters(initParameters);
-
-        return bean;
-    }
-
-
-    @Bean
-    public FilterRegistrationBean webStatFilter(){
-        FilterRegistrationBean bean = new FilterRegistrationBean();
-        bean.setFilter(new WebStatFilter());
-
-        //可以过滤的请求
-        Map&lt;String,String&gt; initParameters = new HashMap&lt;&gt;();
-        //不进行统计
-        initParameters.put(&quot;exclusions&quot;,&quot;*.js,*.css,/druid/*&quot;);
-        bean.setInitParameters(initParameters);
-
-        return bean;
-    }
-}
-
-</code></pre>
-<p>完成，可以通过  http://localhost:8080/druid/login.html  进入后台页面。</p>
-<h3 id="整合-mybatis">整合 Mybatis</h3>
-<ol>
-<li>导入 Mybatis 所需要的依赖</li>
-</ol>
-<pre><code class="language-xml">        &lt;!-- https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
-            &lt;version&gt;2.1.1&lt;/version&gt;
-        &lt;/dependency&gt;
-
-</code></pre>
-<ol start="2">
-<li>配置数据库连接信息</li>
-</ol>
-<pre><code class="language-yml">spring:
-  datasource:
-    username: root
-    password: 123456
-    url: jdbc:mysql://localhost:3306/mybatis?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=utf-8
-    driver-class-name: com.mysql.cj.jdbc.Driver
-mybatis:
-  mapper-locations: classpath:mybatis/mapper/*.xml
-  type-aliases-package: com.squid.pojo
-
-
-</code></pre>
-<ol start="3">
-<li>创建实体类</li>
-<li>配置 Mapper 接口</li>
-</ol>
-<pre><code class="language-java">@Mapper
-@Repository
-public interface UserMapper {
-    List&lt;User&gt; queryUserList();
-    User queryUserById(int id);
-    int addUser(User user);
-    int updateUser(User user);
-    int deleteUser(int id);
-}
-
-</code></pre>
-<ol start="5">
-<li>Mapper 映射文件</li>
-</ol>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-&lt;!DOCTYPE mapper
-        PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;
-        &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
-&lt;mapper namespace=&quot;com.squid.mapper.UserMapper&quot;&gt;
-    &lt;select id=&quot;queryUserList&quot; resultType=&quot;User&quot;&gt;
-        select * from user
-    &lt;/select&gt;
-
-    &lt;select id=&quot;selectUserById&quot; resultType=&quot;User&quot;&gt;
-    select * from user where id = #{id}
-&lt;/select&gt;
-
-    &lt;insert id=&quot;addUser&quot; parameterType=&quot;User&quot;&gt;
-    insert into user (id,name,pwd) values (#{id},#{name},#{pwd})
-&lt;/insert&gt;
-
-    &lt;update id=&quot;updateUser&quot; parameterType=&quot;User&quot;&gt;
-    update user set name=#{name},pwd=#{pwd} where id = #{id}
-&lt;/update&gt;
-
-    &lt;delete id=&quot;deleteUser&quot; parameterType=&quot;int&quot;&gt;
-    delete from user where id = #{id}
-&lt;/delete&gt;
-&lt;/mapper&gt;
-
-</code></pre>
-<ol start="6">
-<li>编写Controller</li>
-</ol>
-<pre><code class="language-java">@RestController
-public class UserController {
-
-    @Autowired
-    private UserMapper userMapper;
-
-    //选择全部用户
-    @GetMapping(&quot;/selectUser&quot;)
-    public String selectUser(){
-        List&lt;User&gt; users = userMapper.selectUser();
-        for (User user : users) {
-            System.out.println(user);
-        }
-
-        return &quot;ok&quot;;
-    }
-    //根据id选择用户
-    @GetMapping(&quot;/selectUserById&quot;)
-    public String selectUserById(){
-        User user = userMapper.selectUserById(1);
-        System.out.println(user);
-        return &quot;ok&quot;;
-    }
-    //添加一个用户
-    @GetMapping(&quot;/addUser&quot;)
-    public String addUser(){
-        userMapper.addUser(new User(5,&quot;阿毛&quot;,&quot;456789&quot;));
-        return &quot;ok&quot;;
-    }
-    //修改一个用户
-    @GetMapping(&quot;/updateUser&quot;)
-    public String updateUser(){
-        userMapper.updateUser(new User(5,&quot;阿毛&quot;,&quot;421319&quot;));
-        return &quot;ok&quot;;
-    }
-    //根据id删除用户
-    @GetMapping(&quot;/deleteUser&quot;)
-    public String deleteUser(){
-        userMapper.deleteUser(5);
-        return &quot;ok&quot;;
-    }
-
-}
-
-</code></pre>
-<h2 id="安全框架">安全框架</h2>
-<h3 id="springsecurity">SpringSecurity</h3>
-<ol>
-<li>导入 SpringSecurity 依赖。</li>
-</ol>
-<pre><code class="language-xml">        &lt;!-- https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity4 --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.thymeleaf.extras&lt;/groupId&gt;
-            &lt;artifactId&gt;thymeleaf-extras-springsecurity4&lt;/artifactId&gt;
-            &lt;version&gt;3.0.4.RELEASE&lt;/version&gt;
-        &lt;/dependency&gt;
-
-</code></pre>
-<ol start="2">
-<li>编写配置类。</li>
-</ol>
-<pre><code class="language-java">//AOP:拦截器
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
-    //链式编程
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers(&quot;/&quot;).permitAll()   //这个页面所有人都可以访问
-                .antMatchers(&quot;/level1/**&quot;).hasRole(&quot;vip1&quot;)  //限制角色访问
-                .antMatchers(&quot;/level2/**&quot;).hasRole(&quot;vip2&quot;)
-                .antMatchers(&quot;/level3/**&quot;).hasRole(&quot;vip3&quot;);
-
-        //没有权限默认跳转至登录页
-        http.formLogin();
-
-        //开启注销功能
-        http.csrf().disable();//关闭csrf
-        http.logout().logoutSuccessUrl(&quot;/&quot;);
-                    
-        //记住我
-        http.rememberMe();
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().passwordEncoder(new BCryptPasswordEncoder())
-                .withUser(&quot;squid&quot;).password(new BCryptPasswordEncoder().encode(&quot;123456&quot;)).roles(&quot;vip2&quot;,&quot;vip3&quot;)
-                .and()
-                .withUser(&quot;root&quot;).password(new BCryptPasswordEncoder().encode(&quot;123456&quot;)).roles(&quot;vip1&quot;,&quot;vip2&quot;,&quot;vip3&quot;)
-                .and()
-                .withUser(&quot;guest&quot;).password(new BCryptPasswordEncoder().encode(&quot;123456&quot;)).roles(&quot;vip1&quot;);
-    }
-}
-
-</code></pre>
-<ol start="3">
-<li>与 Thymeleaf 整合</li>
-</ol>
-<pre><code class="language-html">xmlns:sec=&quot;http://www.thymeleaf.org/thymeleaf-extras-springsecurity4&quot;
-
-</code></pre>
-<p><strong>总结：</strong></p>
-<p>需要记住的几个类：</p>
-<ul>
-<li>WebSecurityConfigurerAdapter：自定义 Security 策略</li>
-<li>AuthenticationManagerBuilder：自定义认证策略</li>
-<li>@EnableWebSecurity：开启 WebSecurity 模式，@Enablexxxx 开启某个功能</li>
-</ul>
-<p>SpringSecurity 主要的两个目标是“认证”和“授权”（控制访问）</p>
-<p>“认证”（Authentication）</p>
-<p>“授权”（Authorization）</p>
-<h3 id="shiro">Shiro</h3>
-<h4 id="简介">简介：</h4>
-<p>Shiro是一个Java安全框架，执行身份验证、授权、密码、会话管理。Shiro是Apache 的一个开源项目，前身是JSecurity 项目，始于2003年初。</p>
-<p>Shiro 可以为任何应用提供安全保障 - 从命令行应用、移动应用到大型网络及企业应用。</p>
-<p>Shiro 解决了应用安全的四要素：</p>
-<ul>
-<li>认证 - 用户身份识别，常被称为用户“登录”；</li>
-<li>授权 - 访问控制；</li>
-<li>密码加密 - 保护或隐藏数据防止被偷窥；</li>
-<li>会话管理 - 每用户相关的时间敏感的状态。</li>
-</ul>
-<h4 id="核心概念">核心概念</h4>
-<p><strong>Subject</strong>：主体，代表了当前“用户”，这个用户不一定是一个具体的人，与当前应用交互的任何东西都是Subject，如网络爬虫，机器人等；即一个抽象概念；所有Subject都绑定到SecurityManager，与Subject的所有交互都会委托给SecurityManager；可以把Subject认为是一个门面；SecurityManager才是实际的执行者；</p>
-<p><strong>SecurityManager</strong>：安全管理器；即所有与安全有关的操作都会与SecurityManager交互；且它管理着所有Subject；可以看出它是Shiro的核心，它负责与后边介绍的其他组件进行交互，如果学习过SpringMVC，你可以把它看成DispatcherServlet前端控制器；</p>
-<p><strong>Realm</strong>：域，Shiro从Realm获取安全数据（如用户、角色、权限），就是说SecurityManager要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。</p>
-<figure data-type="image" tabindex="10"><img src="https://images2018.cnblogs.com/blog/1147108/201806/1147108-20180627204048502-115811133.png" alt="img" loading="lazy"></figure>
-<h4 id="快速开始">快速开始：</h4>
-<ol>
-<li>导入依赖</li>
-</ol>
-<pre><code class="language-xml">    &lt;dependencies&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.apache.shiro&lt;/groupId&gt;
-            &lt;artifactId&gt;shiro-core&lt;/artifactId&gt;
-            &lt;version&gt;1.4.1&lt;/version&gt;
-        &lt;/dependency&gt;
-
-        &lt;!-- configure logging --&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
-            &lt;artifactId&gt;jcl-over-slf4j&lt;/artifactId&gt;
-            &lt;version&gt;1.7.21&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
-            &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
-            &lt;version&gt;1.7.21&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;log4j&lt;/groupId&gt;
-            &lt;artifactId&gt;log4j&lt;/artifactId&gt;
-            &lt;version&gt;1.2.17&lt;/version&gt;
-        &lt;/dependency&gt;
-    &lt;/dependencies&gt;
-
-</code></pre>
-<ol start="2">
-<li>配置文件</li>
-</ol>
-<pre><code class="language-properties">log4j.rootLogger=INFO, stdout
-
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=%d %p [%c] - %m %n
-
-# General Apache libraries
-log4j.logger.org.apache=WARN
-
-# Spring
-log4j.logger.org.springframework=WARN
-
-# Default Shiro logging
-log4j.logger.org.apache.shiro=TRACE
-
-# Disable verbose logging
-log4j.logger.org.apache.shiro.util.ThreadContext=WARN
-log4j.logger.org.apache.shiro.cache.ehcache.EhCache=WARN
-
-</code></pre>
-<pre><code class="language-ini">[users]
-# user 'root' with password 'secret' and the 'admin' role
-root = secret, admin
-# user 'guest' with the password 'guest' and the 'guest' role
-guest = guest, guest
-# user 'presidentskroob' with password '12345' (&quot;That's the same combination on
-# my luggage!!!&quot; ;)), and role 'president'
-presidentskroob = 12345, president
-# user 'darkhelmet' with password 'ludicrousspeed' and roles 'darklord' and 'schwartz'
-darkhelmet = ludicrousspeed, darklord, schwartz
-# user 'lonestarr' with password 'vespa' and roles 'goodguy' and 'schwartz'
-lonestarr = vespa, goodguy, schwartz
-
-# -----------------------------------------------------------------------------
-# Roles with assigned permissions
-#
-# Each line conforms to the format defined in the
-# org.apache.shiro.realm.text.TextConfigurationRealm#setRoleDefinitions JavaDoc
-# -----------------------------------------------------------------------------
-[roles]
-# 'admin' role has all permissions, indicated by the wildcard '*'
-admin = *
-# The 'schwartz' role can do anything (*) with any lightsaber:
-schwartz = lightsaber:*
-# The 'goodguy' role is allowed to 'drive' (action) the winnebago (type) with
-# license plate 'eagle5' (instance specific id)
-goodguy = winnebago:drive:eagle5
-
-</code></pre>
-<ol start="3">
-<li>编写类</li>
-</ol>
-<pre><code class="language-java">//重要方法
-Subject currentUser = SecurityUtils.getSubject();	//获取当前用户对象Subject
-Session session = currentUser.getSession();	//通过当前用户对象获取session（shiro的session）
-currentUser.isAuthenticated()	// 判断当前对象是否已经过认证
-UsernamePasswordToken token = new UsernamePasswordToken(&quot;lonestarr&quot;, &quot;vespa&quot;);	//令牌
-currentUser.getPrincipal()	//当前用户认证
-currentUser.hasRole(&quot;schwartz&quot;)	//是否拥有角色
-currentUser.logout();	//注销
-
-</code></pre>
-<h4 id="shiro-整合-springboot">Shiro 整合 SpringBoot</h4>
-<ol>
-<li>导入依赖</li>
-</ol>
-<pre><code class="language-xml">&lt;!-- https://mvnrepository.com/artifact/org.apache.shiro/shiro-spring --&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.apache.shiro&lt;/groupId&gt;
-    &lt;artifactId&gt;shiro-spring&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1&lt;/version&gt;
-&lt;/dependency&gt;
-
-</code></pre>
-<ol start="2">
-<li>自定义 realm 对象</li>
-</ol>
-<pre><code class="language-java">//自定义 realm 对象
-public class UserRealm extends AuthorizingRealm {
-    @Autowired
-    UserMapper userMapper;
-
-    //授权
-    @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        System.out.println(&quot;执行了=&gt;授权doGetAuthorizationInfo&quot;);
-
-        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
-
-        //拿到当前对象
-        Subject subject = SecurityUtils.getSubject();
-        User currentUser = (User) subject.getPrincipal();   //拿到User对象
-        info.addStringPermission(currentUser.getPerms());
-
-        return info;
-    }
-
-    //认证
-    @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        System.out.println(&quot;执行了=&gt;认证doGetAuthenticationInfo&quot;);
-
-        UsernamePasswordToken usernamePasswordToken = (UsernamePasswordToken)token;
-
-        //用户名，密码从数据库中读取
-        User user = userMapper.queryUserByName(usernamePasswordToken.getUsername());
-
-        if (user == null){
-            return null;
-        }
-
-        Subject subject = SecurityUtils.getSubject();
-        Session session = subject.getSession();
-        session.setAttribute(&quot;loginUser&quot;,user);
-        
-        //密码认证
-        return new SimpleAuthenticationInfo(user,user.getPwd(),&quot;&quot;);
-    }
-}
-
-</code></pre>
-<ol start="3">
-<li>编写 Shiro 的 config 类</li>
-</ol>
-<pre><code class="language-java">@Configuration
-public class ShiroConfig {
-
-    //ShiroFilterFactoryBean 3
-    @Bean
-    public ShiroFilterFactoryBean getShiroFilterFactoryBean(@Qualifier(&quot;securityManager&quot;)DefaultWebSecurityManager defaultWebSecurityManager){
-        ShiroFilterFactoryBean bean = new ShiroFilterFactoryBean();
-        //设置安全管理器
-        bean.setSecurityManager(defaultWebSecurityManager);
-
-        //添加 Shiro 过滤器
-        /*
-            anon: 无需认证即可访问
-            authc: 必须认证了才可以访问
-            user: 必须拥有记住账号才可以访问
-            perms: 拥有对某个资源的权限才可以访问
-            role: 拥有某个角色权限才可以访问
-        */
-        //拦截
-        Map&lt;String,String&gt; filterMap = new LinkedHashMap&lt;&gt;();
-        filterMap.put(&quot;/user/add&quot;,&quot;perms[user:add]&quot;);
-        filterMap.put(&quot;/user/update&quot;,&quot;perms[user:update]&quot;);
-        filterMap.put(&quot;/user/*&quot;,&quot;authc&quot;);
-        bean.setFilterChainDefinitionMap(filterMap);
-
-        //设置登录请求
-        bean.setLoginUrl(&quot;/toLogin&quot;);
-
-        bean.setUnauthorizedUrl(&quot;/noauth&quot;);
-
-        return bean;
-    }
-
-    //DefaultWebSecurityManager 2
-    @Bean(name = &quot;securityManager&quot;)
-    public DefaultWebSecurityManager getDefaultWebSecurityManager(@Qualifier(&quot;userRealm&quot;) UserRealm userRealm){
-        DefaultWebSecurityManager defaultWebSecurityManager = new DefaultWebSecurityManager();
-        //关联 UserRealm
-        defaultWebSecurityManager.setRealm(userRealm);
-        return defaultWebSecurityManager;
-    }
-
-    //创建 realm 对象，需要自定义类 1
-    @Bean
-    public UserRealm userRealm(){
-        return new UserRealm();
-    }
-    
-    
-    @Bean
-    public ShiroDialect getShiroDialect(){
-        return new ShiroDialect();
-    }
-}
-
-</code></pre>
-<ol start="4">
-<li>在 Controller 中进行认证</li>
-</ol>
-<pre><code class="language-java"> @RequestMapping(&quot;/login&quot;)
-    public String login(String username,String password,Model model){
-        //获取当前用户
-        org.apache.shiro.subject.Subject subject = SecurityUtils.getSubject();
-        //封装用户的登录数据
-        UsernamePasswordToken token = new UsernamePasswordToken(username,password);
-
-        try {
-            subject.login(token);//执行登录方法
-            return &quot;index&quot;;
-        } catch (UnknownAccountException e) {
-            model.addAttribute(&quot;msg&quot;,&quot;用户名错误&quot;);
-            return &quot;login&quot;;
-        }catch (IncorrectCredentialsException e){
-            model.addAttribute(&quot;msg&quot;,&quot;密码错误&quot;);
-            return &quot;login&quot;;
-        }
-    }
-
-</code></pre>
-<h4 id="shiro-整合-thymeleaf">Shiro 整合 Thymeleaf</h4>
-<ol>
-<li>导入依赖</li>
-</ol>
-<pre><code class="language-xml">&lt;!-- https://mvnrepository.com/artifact/com.github.theborakompanioni/thymeleaf-extras-shiro --&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;com.github.theborakompanioni&lt;/groupId&gt;
-    &lt;artifactId&gt;thymeleaf-extras-shiro&lt;/artifactId&gt;
-    &lt;version&gt;2.0.0&lt;/version&gt;
-&lt;/dependency&gt;
-
-
-</code></pre>
-<ol start="2">
-<li>加入头文件</li>
-</ol>
-<pre><code class="language-html">xmlns:shiro=&quot;http://www.thymeleaf.org/thymeleaf-extras-shiro&quot;
-
-</code></pre>
-<ol start="3">
-<li>前端使用 shiro 操作</li>
-</ol>
-<pre><code class="language-html">shiro:hasPermission=&quot;user:add&quot;
-
-</code></pre>
-<h2 id="swagger">Swagger</h2>
-<h3 id="介绍">介绍：</h3>
-<p>Swagger 是一个规范和完整的框架，用于生成、描述、调用和可视化 RESTful 风格的 Web 服务。</p>
-<p>作用：</p>
-<p><strong>1.接口的文档在线自动生成。</strong></p>
-<p><strong>2.功能测试。</strong></p>
-<h3 id="在-springboot-中使用-swagger">在 SpringBoot 中使用 Swagger</h3>
-<ol>
-<li>导入两个依赖</li>
-</ol>
-<pre><code class="language-xml">&lt;!-- springfox-swagger2 --&gt;
-&lt;!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 --&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;io.springfox&lt;/groupId&gt;
-    &lt;artifactId&gt;springfox-swagger2&lt;/artifactId&gt;
-    &lt;version&gt;2.9.2&lt;/version&gt;
-&lt;/dependency&gt;
-
-</code></pre>
-<pre><code class="language-xml">&lt;!-- springfox-swagger-ui --&gt;
-&lt;!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui --&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;io.springfox&lt;/groupId&gt;
-    &lt;artifactId&gt;springfox-swagger-ui&lt;/artifactId&gt;
-    &lt;version&gt;2.9.2&lt;/version&gt;
-&lt;/dependency&gt;
-
-</code></pre>
-<ol start="2">
-<li>编写集成类</li>
-</ol>
-<pre><code class="language-java">@Configuration
-@EnableSwagger2 //开启 Swagger2
-public class SwaggerConfig {
-}
-
-</code></pre>
-<ol start="3">
-<li>进入 http://localhost:8080/swagger-ui.html</li>
-</ol>
-<h3 id="配置-swagger-信息">配置 Swagger 信息</h3>
-<pre><code class="language-java">//SwaggerConfig
-@Configuration
-@EnableSwagger2 //开启 Swagger2
-public class SwaggerConfig {
-
-    //配置了 Swagger 的 Docket 的 bean 实例
-    @Bean
-    public Docket docket(){
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo());
-    }
-
-    //配置 Swagger 信息 = ApiInfo
-    private ApiInfo apiInfo(){
-
-        //作者信息
-        Contact contact = new Contact(&quot;Squid&quot;,&quot;&quot;,&quot;502087277@qq.com&quot;);
-
-        return new ApiInfo(
-                &quot;Squid的Swagger文档&quot;,
-                &quot;You only got one shot&quot;,
-                &quot;v1.0&quot;,
-                &quot;http://localhost:8080&quot;,
-                contact,
-                &quot;Aapche 2.0&quot;,
-                &quot;http://www.apache.org/licenses/LICENSE-2.0&quot;,
-                new ArrayList());
-    }
-}
-
-</code></pre>
-<h3 id="配置-swagger-配置扫描接口">配置 Swagger 配置扫描接口</h3>
-<pre><code class="language-java">    //配置了 Swagger 的 Docket 的 bean 实例
-    @Bean
-    public Docket docket(Environment environment){
-
-        //设置要显示的Swagger环境
-        Profiles profiles = Profiles.of(&quot;dev&quot;);
-
-        //获取项目环境 并判断是否在当前指定的环境中
-        boolean flag = environment.acceptsProfiles(profiles);
-
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-//                .enable(flag)    是否启用 Swagger
-                .select()
-                //RequestHandlerSelectors,配置要扫描的方式
-                //basePackage 指定扫描包
-                //any   扫描全部
-                //none  都不扫描
-                //withClassAnnotation   扫描类上的注解
-                .apis(RequestHandlerSelectors.basePackage(&quot;&quot;))
-                //过滤
-                .paths(PathSelectors.any())
-                .build();
-    }
-
-</code></pre>
-<h3 id="配置-api-文档的分组">配置 API 文档的分组</h3>
-<pre><code class="language-java">.groupName(&quot;分组1&quot;)
-
-</code></pre>
-<p>如果需要多个分组，编写多个 Docket 即可。</p>
-<p><strong>注解：</strong></p>
-<pre><code>@Api : 用在类上，说明该类的主要作用。
-
-@ApiOperation：用在方法上，给API增加方法说明。
-
-@ApiImplicitParams : 用在方法上，包含一组参数说明。
-
-@ApiImplicitParam：用来注解来给方法入参增加说明。
-
-@ApiResponses：用于表示一组响应。
-
-@ApiResponse：用在@ApiResponses中，一般用于表达一个错误的响应信息
-
-@ApiModel：用在返回对象类上，描述一个Model的信息（一般用在请求参数无法使用@ApiImplicitParam注解进行描述的时候）
-
-@ApiModelProperty：描述一个model的属性
-
-</code></pre>
-<h2 id="任务">任务</h2>
-<h3 id="异步任务">异步任务</h3>
-<ol>
 <li>
-<p>在需要异步的方法上加上注解 @Async</p>
+<p>功能：根据 key 查询 value</p>
 </li>
 <li>
-<p>在 Main 方法上加上注解 @EnableAsync</p>
+<p>命令</p>
 </li>
-</ol>
-<h3 id="邮件任务">邮件任务</h3>
-<ol>
-<li>导入 mail 依赖</li>
-</ol>
-<pre><code class="language-xml">        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-boot-starter-mail&lt;/artifactId&gt;
+</ul>
+<pre><code>get key
+</code></pre>
+<blockquote>
+<p>信息删除</p>
+</blockquote>
+<ul>
+<li>
+<p>功能：删除 key value</p>
+</li>
+<li>
+<p>命令</p>
+</li>
+</ul>
+<pre><code>del key
+</code></pre>
+<blockquote>
+<p>添加/修改多个数据</p>
+</blockquote>
+<pre><code>mset key1 value1 key2 value2 ...
+</code></pre>
+<blockquote>
+<p>获取多个数据</p>
+</blockquote>
+<pre><code>mget key1 key2 ...
+</code></pre>
+<blockquote>
+<p>获取数据字符个数（字符串长度）</p>
+</blockquote>
+<pre><code>strlen key
+</code></pre>
+<blockquote>
+<p>追加信息到原始信息后</p>
+</blockquote>
+<pre><code>append key value
+</code></pre>
+<blockquote>
+<p>设置数值数据增加/减少指定范围的值</p>
+</blockquote>
+<pre><code>incr/decr key
+incrby/decrby key integerNumber
+incrbyfloat key floatNumber
+</code></pre>
+<blockquote>
+<p>设置指定时常的生命周期的数据</p>
+</blockquote>
+<pre><code>setex key seconds value		
+psetex key milliseconds		
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>数据操作返回值
+<ul>
+<li>表示数据运行结果是否成功，成功：(integer)1、失败：(integer)0</li>
+<li>表示运行结果值，如：(integer)3</li>
+</ul>
+</li>
+<li>未获取到数据
+<ul>
+<li>(nil) 等同于null</li>
+</ul>
+</li>
+<li>数据最大存储量：512MB</li>
+</ul>
+<hr>
+<h3 id="hash类型">Hash类型</h3>
+<blockquote>
+<p>添加/修改数据</p>
+</blockquote>
+<pre><code>hset key field value
+hsetnx key field value 		//如果库中存在key则不添加
+</code></pre>
+<blockquote>
+<p>获取数据</p>
+</blockquote>
+<pre><code>hget key field
+hgetall key			//获取全部
+</code></pre>
+<blockquote>
+<p>删除数据</p>
+</blockquote>
+<pre><code>hdel key field1 [field2]
+</code></pre>
+<blockquote>
+<p>添加/修改多个数据</p>
+</blockquote>
+<pre><code>hmset key field1 value1 field2 value2 ...
+</code></pre>
+<blockquote>
+<p>获取数据</p>
+</blockquote>
+<pre><code>hmget key field1 field2 ...
+</code></pre>
+<blockquote>
+<p>获取哈希表中的字数</p>
+</blockquote>
+<pre><code>hlen key
+</code></pre>
+<blockquote>
+<p>获取哈希表中是否存在指定字段</p>
+</blockquote>
+<pre><code>hexists key field
+</code></pre>
+<blockquote>
+<p>获取哈希表中所有的字段名或字段值</p>
+</blockquote>
+<pre><code>hkeys key
+hvals key
+
+</code></pre>
+<blockquote>
+<p>设置指定字段的数值数据增加指定范围的值</p>
+</blockquote>
+<pre><code>hincrby key field integerNumber
+hincrbyfloat key field floatNumber
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>hash类型下的value只能存储字符串，不允许存储其他数据类型</li>
+<li>每个hash可以存储2<sup>32</sup>-1个键值对</li>
+<li>hash类型十分贴近对象的数据存储形式，并且可以灵活的添加或删除对象属性，但hash设计初衷并不是为了存储大量对象，所以不可滥用，更不可将hash作为对象列表使用</li>
+<li>hgetall可以获取全部属性，但是如果内部field过多，会导致遍历整体数据效率变低，成为数据访问瓶颈</li>
+</ul>
+<hr>
+<h3 id="list类型">List类型</h3>
+<blockquote>
+<p>添加/修改数据</p>
+</blockquote>
+<pre><code>lpush key value1 [value2] ...	//左进入
+rpush key value1 [value2] ...	//右进入
+
+</code></pre>
+<blockquote>
+<p>获取数据</p>
+</blockquote>
+<pre><code>lrange key start stop
+lindex key index
+llen key
+
+</code></pre>
+<blockquote>
+<p>获取并移除数据</p>
+</blockquote>
+<pre><code>lpop key
+rpop key
+
+</code></pre>
+<blockquote>
+<p>规定时间内获取并移除数据</p>
+</blockquote>
+<pre><code>blpop key1 [key2] timeout
+brpop key1 [key2] timeout
+
+</code></pre>
+<blockquote>
+<p>移除指定数据</p>
+</blockquote>
+<pre><code>lrem key count value
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>list中保存的数据都是string类型的，最多容纳2<sup>32</sup>-1条数据</li>
+<li>list具有索引的概念，但是操作时通常以队列的形式进行出入队操作，或以栈形式进行出入栈操作</li>
+<li>获取全部数据操作的结束索引设置为-1</li>
+<li>list可以对数据进行分页操作，通常第一页信息来自于list，第二页及更多信息通过数据库加载</li>
+</ul>
+<hr>
+<h3 id="set类型">Set类型</h3>
+<blockquote>
+<p>添加数据</p>
+</blockquote>
+<pre><code>sadd key member1 [member2]
+
+</code></pre>
+<blockquote>
+<p>获取全部数据</p>
+</blockquote>
+<pre><code>semebers key
+
+</code></pre>
+<blockquote>
+<p>删除数据</p>
+</blockquote>
+<pre><code>srem key member1 [member2]
+
+</code></pre>
+<blockquote>
+<p>获取集合数据总量</p>
+</blockquote>
+<pre><code>scard key
+
+</code></pre>
+<blockquote>
+<p>判断集合中是否包含指定数据</p>
+</blockquote>
+<pre><code>sismember key member
+
+</code></pre>
+<blockquote>
+<p>随机获取集合中指定数量的数据</p>
+</blockquote>
+<pre><code>srandmember key [count]
+
+</code></pre>
+<blockquote>
+<p>随机获取集合中的某个数据并将该数据移出集合</p>
+</blockquote>
+<pre><code>spop key [count]
+
+</code></pre>
+<blockquote>
+<p>求两个集合的交、并、差集</p>
+</blockquote>
+<pre><code>sinter key1 [key...]
+sunion key1 [key...]
+sdiff key1 [key...]
+
+</code></pre>
+<blockquote>
+<p>求两个集合的交、并、差集并存到指定集合中</p>
+</blockquote>
+<pre><code>sinterstore destination key1 [key...]
+sunionstore destination key1 [key...]
+sdiffstore destination key1 [key...]
+
+</code></pre>
+<blockquote>
+<p>将指定数据从原始集合中移动到目标集合中</p>
+</blockquote>
+<pre><code>smove source destination member
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>set类型不允许数据重复，如果添加的数据在set中已存在，将只保留一份</li>
+<li>set虽然与hash的存储结构相同，但是无法启用hash中存储值的空间</li>
+</ul>
+<hr>
+<h3 id="sorted_set类型">Sorted_set类型</h3>
+<blockquote>
+<p>添加数据</p>
+</blockquote>
+<pre><code>zadd key score1 member1 [score member ...]
+
+</code></pre>
+<blockquote>
+<p>获取全部数据</p>
+</blockquote>
+<pre><code>zrange key start stop [WITHSCORES]
+zrevrange key start stop [WITHSCORES]
+
+</code></pre>
+<blockquote>
+<p>删除数据</p>
+</blockquote>
+<pre><code>zrem key member [member ...]
+
+</code></pre>
+<blockquote>
+<p>按条件获取数据</p>
+</blockquote>
+<pre><code>zrangebyrescore key min max [WITHSCORES] [LIMIT]
+zrevrangebyscore key min max [WITHSCORES] [LIMIT]
+
+</code></pre>
+<blockquote>
+<p>条件删除数据</p>
+</blockquote>
+<pre><code>zremrangebyrank key start stop
+zremrangebyscore key min max
+
+</code></pre>
+<blockquote>
+<p>获取集合数据总量</p>
+</blockquote>
+<pre><code>zcard key
+zcount key min max
+
+</code></pre>
+<blockquote>
+<p>集合交、并操作</p>
+</blockquote>
+<pre><code>zinterstore destination numkeys key [key ...]
+zunionstore destination numkeys key [key ...]
+
+</code></pre>
+<blockquote>
+<p>获取数据对应的索引（排名）</p>
+</blockquote>
+<pre><code>zrank key member
+zrevrank key member
+
+</code></pre>
+<blockquote>
+<p>score值获取与修改</p>
+</blockquote>
+<pre><code>zscore key member
+zincrby key increment 
+
+</code></pre>
+<p><strong>注意事项：</strong></p>
+<ul>
+<li>score保存的数据存储空间是64位</li>
+<li>score保存的数据也可以是一个双精度的double值，基于双精度浮点数的特征，可能会丢失精度，使用时需要谨慎</li>
+<li>sorted_set底层存储结构还是基于set的，因此数据不允许重复，如果重复添加数据，score值将被覆盖，保留最后一次修改的结果</li>
+</ul>
+<hr>
+<h2 id="通用命令">通用命令</h2>
+<h3 id="key的基本操作">key的基本操作</h3>
+<blockquote>
+<p>删除指定key</p>
+</blockquote>
+<pre><code>del key
+
+</code></pre>
+<blockquote>
+<p>获取key是否存在</p>
+</blockquote>
+<pre><code>exists key
+
+</code></pre>
+<blockquote>
+<p>获取key的类型</p>
+</blockquote>
+<pre><code>type key
+
+</code></pre>
+<blockquote>
+<p>查询key</p>
+</blockquote>
+<pre><code>keys pattern
+* 匹配任意数量的任意符号
+? 匹配任意一个符号
+[] 匹配一个指定的符号
+
+</code></pre>
+<blockquote>
+<p>改变key的名字</p>
+</blockquote>
+<pre><code>rename key newkey
+renamenx key newkey
+
+</code></pre>
+<blockquote>
+<p>对所有key排序</p>
+</blockquote>
+<pre><code>sort
+
+</code></pre>
+<p><strong>时效性操作：</strong></p>
+<blockquote>
+<p>为指定的key设置有效期</p>
+</blockquote>
+<pre><code>expire key seconds
+pexpire key milliseconds
+expireat key timestamp
+pexpireat key milliseconds
+
+</code></pre>
+<blockquote>
+<p>获取key的有效时间</p>
+</blockquote>
+<pre><code>ttl key
+pttl key
+
+</code></pre>
+<blockquote>
+<p>将key从时效性转换为永久性</p>
+</blockquote>
+<pre><code>persist key
+
+</code></pre>
+<hr>
+<h3 id="数据库基本操作">数据库基本操作</h3>
+<ul>
+<li>redis为每个服务提供有16个数据库，编号从0-15</li>
+<li>每个数据库之间的数据相互独立</li>
+</ul>
+<blockquote>
+<p>切换数据库</p>
+</blockquote>
+<pre><code>select index
+
+</code></pre>
+<blockquote>
+<p>数据移动</p>
+</blockquote>
+<pre><code>move key db
+
+</code></pre>
+<blockquote>
+<p>数据清除</p>
+</blockquote>
+<pre><code>dbsize		//查看数据总量
+flushdb		//清除当前数据
+flushall	//清除全部数据
+
+</code></pre>
+<blockquote>
+<p>其他操作</p>
+</blockquote>
+<pre><code>quit
+ping
+echo message
+
+</code></pre>
+<hr>
+<h2 id="jdies">Jdies</h2>
+<blockquote>
+<p>Jedis简介</p>
+</blockquote>
+<p>Jedis是Java语言连接redis服务。</p>
+<hr>
+<h3 id="使用方式">使用方式</h3>
+<blockquote>
+<p>在pom文件中导入jedis的依赖。</p>
+</blockquote>
+<pre><code class="language-xml">        &lt;!-- jedis --&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;redis.clients&lt;/groupId&gt;
+            &lt;artifactId&gt;jedis&lt;/artifactId&gt;
+            &lt;version&gt;3.2.0&lt;/version&gt;
         &lt;/dependency&gt;
 
 </code></pre>
-<ol start="2">
-<li>在 application 文件中进行配置</li>
-</ol>
-<pre><code class="language-propertie">spring.mail.username=502087277@qq.com
-spring.mail.password=wzqqhkjscfyrbidi
-spring.mail.host=smtp.qq.com
-# 开启加密验证
-spring.mail.properties.mail.smtp.ssl.enable=true
+<blockquote>
+<p>在类中进行连接</p>
+</blockquote>
+<pre><code class="language-java">        //1.连接redis
+        Jedis jedis = new Jedis(&quot;127.0.0.1&quot;, 6379);
+        //2.操作redis
+        jedis.set(&quot;name&quot;,&quot;squid&quot;);//Jedis中的方法名与redis中命令名完全一致
+        String name = jedis.get(&quot;name&quot;);
+        System.out.println(name);
+        //3.断开连接
+        jedis.close();
 
 </code></pre>
-<ol start="3">
-<li>发送邮件</li>
-</ol>
-<p><strong>简单邮件：</strong></p>
-<pre><code class="language-java">    @Autowired
-    JavaMailSenderImpl mailSender;
+<p>**注意：**从redis中取出的所有数据类型与java中的数据类型一一对应。</p>
+<hr>
+<h3 id="jedis工具类">Jedis工具类</h3>
+<pre><code class="language-java">public class JedisUtil {
+    private static JedisPool jedisPool = null;
+    private static Integer port = null;
+    private static Integer maxTotal = null;
+    private static Integer maxIdle = null;
 
-		//一个简单的邮件
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setSubject(&quot;亲爱的 Squid！你好&quot;);
-        mailMessage.setText(&quot;感谢秦老师的课程&quot;);
-        mailMessage.setTo(&quot;502087277@qq.com&quot;);
-        mailMessage.setFrom(&quot;502087277@qq.com&quot;);
-        mailSender.send(mailMessage);
+    static{
+        ResourceBundle resourceBundle = ResourceBundle.getBundle(&quot;redis&quot;);//获取配置文件
+        String host = resourceBundle.getString(&quot;redis.host&quot;);
+        port = Integer.valueOf(resourceBundle.getString(&quot;redis.port&quot;));
+        maxTotal = Integer.valueOf(resourceBundle.getString(&quot;redis.maxTotal&quot;));
+        maxIdle = Integer.valueOf(resourceBundle.getString(&quot;redis.maxIdle&quot;));
 
-</code></pre>
-<p><strong>复杂邮件：</strong></p>
-<pre><code class="language-java">        //一个复杂邮件
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        //组装
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage,true);
-
-        helper.setSubject(&quot;亲爱的 Squid！ 你好呀~&quot;);
-        helper.setText(&quot;&lt;p style='color:red'&gt;感谢秦老师的课程&lt;/p&gt;&quot;,true);
-
-        //附件
-        helper.addAttachment(&quot;1.jpg&quot;,new File(&quot;F:\\素材\\主界面\\home_page_back.png&quot;));
-
-        helper.setTo(&quot;502087277@qq.com&quot;);
-        helper.setFrom(&quot;502087277@qq.com&quot;);
-
-        mailSender.send(mimeMessage);
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(maxTotal);//最大连接数
+        jedisPoolConfig.setMaxIdle(maxIdle);//活动连接数
+        jedisPool = new JedisPool(jedisPoolConfig,host,port);
+    }
+    public static Jedis getJedis(){
+        return jedisPool.getResource();
+    }
+}
 
 </code></pre>
-<h3 id="定时任务">定时任务</h3>
-<ol>
-<li>在 main 方法上添加注解 @EnableScheduling</li>
-<li>使用 @Scheduled 表示什么时候执行（使用 cron 表达式）</li>
-</ol>
-<p>cron 表达式参考： https://www.cnblogs.com/tommyli/p/3760671.html</p>
 ]]></content>
     </entry>
 </feed>
